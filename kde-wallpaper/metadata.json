@@ -1,0 +1,13 @@
+{
+  "KPlugin": {
+    "Id": "eu.zsync.zwall",
+    "Name": "ZWall",
+    "Description": "Lets ZWall's live wallpaper show through, under your desktop icons",
+    "License": "GPL-3.0-or-later",
+    "Authors": [{ "Name": "TheHolyOneZ" }],
+    "Icon": "zwall",
+    "Website": "https://zsync.eu/zwall"
+  },
+  "KPackageStructure": "Plasma/Wallpaper",
+  "X-Plasma-API-Minimum-Version": "6.0"
+}

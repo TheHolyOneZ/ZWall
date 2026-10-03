@@ -1,0 +1,17 @@
+[package]
+name = "zwall-format"
+description = "The .zwall file format: a zip with manifest.toml and assets"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+zip = { version = "8", default-features = false, features = ["deflate"] }
+# Pure Rust JPEG XL decoder: rebuilds packed JPEGs byte for byte on any system.
+jxl-oxide = { version = "0.12", default-features = false }
+crc32fast = "1"

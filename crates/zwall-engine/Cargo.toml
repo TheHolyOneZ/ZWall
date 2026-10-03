@@ -1,0 +1,61 @@
+[package]
+name = "zwall-engine"
+description = "ZWall render daemon: owns the wallpaper surfaces, survives the UI closing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+crc32fast = "1"
+zwall-format = { workspace = true }
+zwall-ipc = { workspace = true }
+zwall-render = { workspace = true }
+zwall-depth = { workspace = true }
+zip = { version = "8", default-features = false, features = ["deflate"] }
+raw-window-handle = "0.6"
+anyhow = { workspace = true }
+log = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+tungstenite = { version = "0.30", default-features = false, features = ["handshake"] }
+env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }
+
+[target.'cfg(unix)'.dependencies]
+signal-hook = "0.3"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Video: libmpv draws into our window (X11) or through its render API (Wayland).
+libmpv2 = { version = "6", default-features = false }
+libmpv2-sys = "4"
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
+x11rb = { version = "0.14", features = ["allow-unsafe-code", "randr", "shape", "screensaver", "xinput"] }
+smithay-client-toolkit = "0.21"
+wayland-backend = { version = "0.3", features = ["client_system"] }
+khronos-egl = { version = "6", features = ["dynamic"] }
+
+# Windows: Win32 for the desktop (WorkerW), monitors, input, power, processes and audio sessions.
+# Video plays through mpv.exe (no link-time dependency on libmpv).
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Graphics_Dwm",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_HiDpi",
+    "Win32_UI_Shell",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Power",
+    "Win32_System_Threading",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_StationsAndDesktops",
+    "Win32_System_SystemInformation",
+    "Win32_System_Registry",
+    "Win32_System_Com",
+    "Win32_Media_Audio",
+    "Win32_System_Pipes",
+    "Win32_System_Com_StructuredStorage",
+    "Win32_System_Variant",
+] }

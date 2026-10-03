@@ -1,0 +1,13 @@
+[package]
+name = "zwall-depth"
+description = "Photo to depth map (Depth Anything V2 Small, local ONNX inference)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+log = { workspace = true }
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+ort = { version = "=2.0.0-rc.13" }

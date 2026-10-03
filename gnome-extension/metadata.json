@@ -1,0 +1,8 @@
+{
+  "uuid": "zwall@zsync.eu",
+  "name": "ZWall",
+  "description": "Shows ZWall live wallpapers as your desktop background, below desktop icons and every window.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "url": "https://zsync.eu/zwall",
+  "version": 1
+}

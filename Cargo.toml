@@ -1,0 +1,42 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/zwall-format",
+    "crates/zwall-ipc",
+    "crates/zwall-render",
+    "crates/zwall-depth",
+    "crates/zwall-engine",
+    "src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+authors = ["TheHolyOneZ"]
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+thiserror = "2"
+log = "0.4"
+toml = "1"
+zwall-format = { path = "crates/zwall-format" }
+zwall-ipc = { path = "crates/zwall-ipc" }
+zwall-render = { path = "crates/zwall-render" }
+zwall-depth = { path = "crates/zwall-depth" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+opt-level = 3
+
+# Keep debug builds small (the full-debuginfo tree is ~9 GB with Tauri + wgpu) and fast.
+[profile.dev]
+debug = "line-tables-only"
+
+# Rendering and depth inference must be usable in debug builds.
+[profile.dev.package."*"]
+opt-level = 3
+debug = false
