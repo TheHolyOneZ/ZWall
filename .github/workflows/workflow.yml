@@ -64,8 +64,28 @@ jobs:
         continue-on-error: true
         run: cargo test --workspace --locked
 
-      - name: Build installer (engine + app + NSIS)
-        run: pnpm release
+      - name: Build the engine
+        run: cargo build -p zwall-engine --release --locked
+
+      - name: Place the engine next to the app and write the packaging config
+        shell: pwsh
+        run: |
+          $bins = "src-tauri/binaries"
+          New-Item -ItemType Directory -Force $bins | Out-Null
+          Copy-Item target/release/zwall-engine.exe "$bins/zwall-engine-x86_64-pc-windows-msvc.exe"
+          $resources = @{}
+          Get-ChildItem target/release -Filter *.dll -ErrorAction SilentlyContinue | ForEach-Object {
+            Copy-Item $_.FullName "$bins/$($_.Name)"
+            $resources["binaries/$($_.Name)"] = $_.Name
+          }
+          if (Test-Path "$bins/mpv.exe") { $resources["binaries/mpv.exe"] = "mpv.exe" }
+          $bundle = @{ targets = @("nsis"); externalBin = @("binaries/zwall-engine") }
+          if ($resources.Count -gt 0) { $bundle.resources = $resources }
+          @{ bundle = $bundle } | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 src-tauri/tauri.release.conf.json
+          Get-Content src-tauri/tauri.release.conf.json
+
+      - name: Build installer (NSIS)
+        run: pnpm tauri build --config src-tauri/tauri.release.conf.json
 
       - name: List bundle output
         if: always()
@@ -125,8 +145,28 @@ jobs:
       - name: Rust tests
         run: cargo test --workspace --locked
 
-      - name: Build packages (engine + app + deb + rpm)
-        run: pnpm release
+      - name: Build the engine
+        run: cargo build -p zwall-engine --release --locked
+
+      - name: Place the engine next to the app and write the packaging config
+        run: |
+          mkdir -p src-tauri/binaries
+          cp target/release/zwall-engine src-tauri/binaries/zwall-engine-x86_64-unknown-linux-gnu
+          cat > src-tauri/tauri.release.conf.json <<'JSON'
+          {
+            "bundle": {
+              "targets": ["deb", "rpm"],
+              "externalBin": ["binaries/zwall-engine"],
+              "linux": {
+                "deb": { "depends": ["libmpv2", "libwebkit2gtk-4.1-0"], "recommends": ["ffmpeg", "libjxl-tools"] },
+                "rpm": { "depends": ["mpv-libs", "webkit2gtk4.1"], "recommends": ["ffmpeg", "libjxl-utils"] }
+              }
+            }
+          }
+          JSON
+
+      - name: Build packages (.deb + .rpm)
+        run: pnpm tauri build --config src-tauri/tauri.release.conf.json
 
       - name: List bundle output
         if: always()
