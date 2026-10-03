@@ -1,0 +1,215 @@
+name: Build ZWall (Windows + Linux)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: short
+  COREPACK_ENABLE_AUTO_PIN: "0"
+  COREPACK_ENABLE_STRICT: "0"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-windows:
+    name: Windows x64 (NSIS installer)
+    runs-on: windows-2025
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Set up Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust build cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          workspaces: ". -> target"
+          key: windows-x64
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Bundle mpv.exe for video wallpapers
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $asset = gh api repos/zhongfly/mpv-winbuild/releases/latest --jq '.assets[] | select(.name | test("^mpv-x86_64-[0-9].*\\.7z$")) | .browser_download_url' | Select-Object -First 1
+          if (-not $asset) { Write-Warning "No mpv build found; the installer will ask users to install mpv"; exit 0 }
+          Write-Host "mpv: $asset"
+          Invoke-WebRequest -Uri $asset -OutFile mpv.7z
+          7z x mpv.7z -ompv -y | Out-Null
+          New-Item -ItemType Directory -Force src-tauri/binaries | Out-Null
+          Copy-Item (Get-ChildItem -Recurse mpv -Filter mpv.exe | Select-Object -First 1).FullName src-tauri/binaries/mpv.exe
+
+      - name: Rust tests (on real Windows)
+        continue-on-error: true
+        run: cargo test --workspace --locked
+
+      - name: Build installer (engine + app + NSIS)
+        run: pnpm release
+
+      - name: List bundle output
+        if: always()
+        shell: pwsh
+        run: Get-ChildItem -Recurse target -Include *.exe -ErrorAction SilentlyContinue | Where-Object FullName -match 'bundle' | Select-Object FullName, Length
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+  build-linux:
+    name: Linux x86_64 (.deb + .rpm)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Set up Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential pkg-config curl wget file patchelf rpm \
+            libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev \
+            libmpv-dev libwayland-dev libxkbcommon-dev libegl-dev
+
+      - name: Rust build cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          workspaces: ". -> target"
+          key: linux-x64
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Rust tests
+        run: cargo test --workspace --locked
+
+      - name: Build packages (engine + app + deb + rpm)
+        run: pnpm release
+
+      - name: List bundle output
+        if: always()
+        run: find target -type f \( -name '*.deb' -o -name '*.rpm' \) -path '*bundle*' -exec ls -la {} \; 2>/dev/null || true
+
+      - name: Upload Linux packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: |
+            target/release/bundle/deb/*.deb
+            target/release/bundle/rpm/*.rpm
+          if-no-files-found: error
+          retention-days: 30
+
+  draft-release:
+    name: Draft release
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read app version
+        id: meta
+        run: |
+          VERSION=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building draft for v$VERSION"
+
+      - name: Refuse to touch an already-published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          PUBLISHED=$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+            --jq "[.[] | select(.tag_name==\"$TAG\" and .draft==false)] | length")
+          if [ "$PUBLISHED" != "0" ]; then
+            echo "::error::A published release $TAG already exists. Bump the version in src-tauri/tauri.conf.json, package.json and the root Cargo.toml first."
+            exit 1
+          fi
+
+      - name: Remove any previous draft for this tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          for ID in $(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+            --jq ".[] | select(.tag_name==\"$TAG\" and .draft==true) | .id"); do
+            echo "Deleting stale draft release $ID"
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/$ID"
+          done
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Collect installers
+        run: |
+          mkdir -p release
+          find dist -type f \( -name '*.exe' -o -name '*.deb' -o -name '*.rpm' \) -exec cp {} release/ \;
+          test -n "$(ls -A release)" || { echo "::error::No installers found"; exit 1; }
+          (cd release && sha256sum * > SHA256SUMS.txt)
+          ls -lah release/
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ZWall ${{ steps.meta.outputs.tag }}
+          draft: true
+          prerelease: false
+          files: release/*
+          body: |
+            **Draft.** Installers for ZWall ${{ steps.meta.outputs.tag }}:
+
+            - **Windows 10/11:** `ZWall_${{ steps.meta.outputs.version }}_x64-setup.exe`
+            - **Debian / Ubuntu / Mint:** `ZWall_${{ steps.meta.outputs.version }}_amd64.deb`
+            - **Fedora / openSUSE:** `ZWall-${{ steps.meta.outputs.version }}-1.x86_64.rpm`
+            - `SHA256SUMS.txt` to verify the downloads
+
+            Downloads for users: https://zsync.eu/zwall/
