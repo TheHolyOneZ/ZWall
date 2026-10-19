@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { Battery, Check, Clock, GripVertical, Image as ImageIcon, MoreHorizontal, Pause, Play, PlugZap, Plus, Power, Repeat, Search, Shuffle, ListOrdered, AppWindow, VolumeX, Volume2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -15,7 +13,6 @@ import { Switch } from "./ui/Switch";
 import { Tip } from "./Tip";
 
 const localDay = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
 
 function poolOf(src: Source, library: Wallpaper[]): Wallpaper[] {
   const ready = library.filter((w) => !w.developing);
@@ -63,7 +60,6 @@ export function AutomateView() {
     list.map((a) => a.id),
     { onOrder: (ids) => auto.save(ids.map((id) => list.find((a) => a.id === id)!)) },
   );
-
 
   useEffect(() => {
     if (!focus) return;
@@ -299,7 +295,6 @@ function DayLine({ list, day, onAdd, onFocus }: { list: Automation[]; day: numbe
   );
 }
 
-
 function Marker({ a }: { a: Automation }) {
   const library = useStore((s) => s.library);
   const box = "w-[52px] h-[30px] rounded-[7px] overflow-hidden relative";
@@ -353,7 +348,6 @@ function ActionIcon({ a, size = 13 }: { a: Action; size?: number }) {
   return <I size={size} />;
 }
 
-
 function Card({ a, flash, item, grip, pick }: { a: Automation; flash: boolean; item: ReturnType<ReturnType<typeof useReorder>["item"]>; grip: ReturnType<ReturnType<typeof useReorder>["grip"]>; pick(onPick: (w: Wallpaper) => void): void }) {
   const monitors = useStore((s) => s.engine?.monitors) ?? [];
   const library = useStore((s) => s.library);
@@ -366,7 +360,6 @@ function Card({ a, flash, item, grip, pick }: { a: Automation; flash: boolean; i
   const t = a.trigger;
   const act = a.action;
   const wall = auto.changesWallpaper(act);
-
 
   const triggerMenu: MenuItem[] = [
     { label: "At a time of day", checked: t.type === "at", onSelect: () => set({ trigger: { type: "at", time: t.type === "at" ? t.time : "08:00" } }) },
@@ -451,7 +444,6 @@ function Card({ a, flash, item, grip, pick }: { a: Automation; flash: boolean; i
     { separator: true },
     { label: "Delete", danger: true, onSelect: () => auto.remove(a.id) },
   ];
-
 
   const resting = wall && a.respect_manual ? monitors.filter((m) => (!a.screens.length || a.screens.includes(m.name)) && manual[m.name] === localDay()).map((m) => m.name) : [];
   const next = auto.nextRun(a);
@@ -577,7 +569,6 @@ function Card({ a, flash, item, grip, pick }: { a: Automation; flash: boolean; i
   );
 }
 
-
 function Word({ children, onClick, icon, quiet, thumb, fan }: { children: React.ReactNode; onClick(e: React.MouseEvent): void; icon?: React.ReactNode; quiet?: boolean; thumb?: Wallpaper; fan?: Wallpaper[] }) {
   return (
     <button
@@ -604,7 +595,6 @@ function Word({ children, onClick, icon, quiet, thumb, fan }: { children: React.
     </button>
   );
 }
-
 
 function TimeWord({ value, onChange }: { value: string; onChange(v: string): void }) {
   const [draft, setDraft] = useState(value);
@@ -666,7 +656,6 @@ function Tick({ on, label, onChange }: { on: boolean; label: string; onChange(v:
   );
 }
 
-
 function Starters({ onPick, onBlank }: { onPick(t: auto.Template): void; onBlank(): void }) {
   const icons: Record<string, typeof Clock> = { daynight: Clock, hourly: Repeat, morning: Shuffle, weekend: Clock, gaming: AppWindow, battery: Battery, "night-quiet": VolumeX, login: Power };
   return (
@@ -694,7 +683,6 @@ function Starters({ onPick, onBlank }: { onPick(t: auto.Template): void; onBlank
     </section>
   );
 }
-
 
 function Picker({ onPick, onClose }: { onPick(w: Wallpaper): void; onClose(): void }) {
   const library = useStore((s) => s.library);

@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import { send } from "./actions";
 import { assetUrl as assetUrlOf } from "./ipc";
@@ -13,7 +12,6 @@ export interface Toast {
   action?: { label: string; run(): void };
 }
 
-
 export interface Carry {
   wallpaper: Wallpaper;
   x: number;
@@ -23,7 +21,6 @@ export interface Carry {
 }
 
 export type Mode = "stage" | "library" | "automate";
-
 
 export interface MenuItem {
   label?: string;
@@ -47,7 +44,6 @@ export interface Prompt {
 }
 
 interface Store {
-
   selected: string[];
   anchor: string | null;
   select(ids: string[], anchor?: string | null): void;
@@ -63,7 +59,6 @@ interface Store {
   editingWidget: string | null;
   editWidget(id: string | null): void;
   editWatch(w: { id?: string; path?: string } | null): void;
-
 
   focusAutomation: string | null;
 
@@ -98,7 +93,6 @@ interface Store {
   toast(kind: Toast["kind"], text: string, action?: Toast["action"]): void;
   dismissToast(id: number): void;
 }
-
 
 function derive(engine: EngineState | null, pending: Wallpaper[]): Wallpaper[] {
   const favs = new Set(engine?.favourites ?? []);
@@ -164,7 +158,6 @@ export const useStore = create<Store>((set, get) => ({
     try {
       localStorage.setItem(MODE_KEY, mode);
     } catch {
-
     }
   },
   hydrated: false,
@@ -223,7 +216,6 @@ export const useStore = create<Store>((set, get) => ({
 
 export const byPath = (lib: Wallpaper[], path: string | null) => (path ? lib.find((w) => w.path === path) : undefined);
 
-
 export function resolve(lib: Wallpaper[], path: string | null): Wallpaper | undefined {
   if (!path) return undefined;
   const known = byPath(lib, path);
@@ -242,10 +234,7 @@ export function resolve(lib: Wallpaper[], path: string | null): Wallpaper | unde
   };
 }
 
-
 export function useThumb(w: Wallpaper | undefined): string | null {
-
-
   const thumb = useStore((s) => (w ? s.engine?.thumbs?.[w.path] : undefined));
   if (!w) return null;
   return assetUrlOf(thumb);

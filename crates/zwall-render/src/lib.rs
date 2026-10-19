@@ -1,5 +1,3 @@
-
-
 use anyhow::{anyhow, bail, Context};
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle};
 use std::{path::Path, time::Instant};
@@ -7,7 +5,6 @@ use std::{path::Path, time::Instant};
 pub const COMMON: &str = include_str!("../shaders/common.wgsl");
 
 pub const COMMON_VERSION: &str = COMMON;
-
 
 pub const PRESETS: &[(&str, &str)] = &[
     ("aurora", include_str!("../shaders/aurora.wgsl")),
@@ -25,7 +22,6 @@ pub const PRESETS: &[(&str, &str)] = &[
 ];
 pub const PHOTO: &str = include_str!("../shaders/photo.wgsl");
 
-
 pub const LAYERS: &[(&str, &str)] = &[
     ("rain", include_str!("../shaders/layers/rain.wgsl")),
     ("snow", include_str!("../shaders/layers/snow.wgsl")),
@@ -37,21 +33,16 @@ const BLIT: &str = include_str!("../shaders/blit.wgsl");
 const IMAGE_EXT: &[&str] = &["jpg", "jpeg", "png", "webp"];
 const VIDEO_EXT: &[&str] = &["mp4", "webm", "mkv", "mov", "gif"];
 
-
 pub enum Source {
     Shader(&'static str),
-
 
     Image(image::RgbaImage, Option<image::GrayImage>, Option<image::RgbaImage>),
 }
 
 impl Source {
-
-
     pub fn load_with_depth(path: &str, depth: Option<&str>) -> anyhow::Result<Self> {
         Self::load_photo(path, depth, None)
     }
-
 
     pub fn load_photo(path: &str, depth: Option<&str>, motion: Option<&str>) -> anyhow::Result<Self> {
         match Self::load(path)? {
@@ -87,7 +78,6 @@ impl Source {
         bail!("ZWall can't play .{ext} files")
     }
 }
-
 
 #[derive(Debug, Clone, Copy)]
 pub struct FrameInputs {
@@ -149,18 +139,15 @@ impl Gpu {
         Self { instance: wgpu::Instance::new(desc), dev: None }
     }
 
-
     #[allow(clippy::missing_safety_doc)]
     pub unsafe fn create_surface(&self, display: RawDisplayHandle, window: RawWindowHandle) -> anyhow::Result<wgpu::Surface<'static>> {
         let target = wgpu::SurfaceTargetUnsafe::RawHandle { raw_display_handle: Some(display), raw_window_handle: window };
         Ok(unsafe { self.instance.create_surface_unsafe(target) }?)
     }
 
-
     pub fn adapter_name(&mut self) -> Option<String> {
         self.device(None).ok().map(|d| d.adapter.get_info().name)
     }
-
 
     fn device(&mut self, surface: Option<&wgpu::Surface>) -> anyhow::Result<&Device> {
         if self.dev.is_none() {
@@ -178,7 +165,6 @@ impl Gpu {
     }
 }
 
-
 struct Pipeline {
     pipeline: wgpu::RenderPipeline,
     bind_group: wgpu::BindGroup,
@@ -189,7 +175,6 @@ impl Pipeline {
     fn new(device: &wgpu::Device, queue: &wgpu::Queue, source: &Source, format: wgpu::TextureFormat) -> Self {
         Self::with_blend(device, queue, source, format, None)
     }
-
 
     fn layer(device: &wgpu::Device, queue: &wgpu::Queue, wgsl: &'static str, format: wgpu::TextureFormat) -> Self {
         Self::with_blend(device, queue, &Source::Shader(wgsl), format, Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING))
@@ -224,7 +209,7 @@ impl Pipeline {
                 let flat = image::GrayImage::from_pixel(1, 1, image::Luma([102]));
                 let depth_view = upload_gray(device, queue, depth.as_ref().unwrap_or(&flat));
 
-                let still = image::RgbaImage::from_pixel(1, 1, image::Rgba([0, 0, 0, 0]));
+                let still = image::RgbaImage::from_pixel(1, 1, image::Rgba([0, 0, 0, 255]));
                 let motion_view = upload(device, queue, motion.as_ref().unwrap_or(&still));
                 (format!("{COMMON}\n{PHOTO}"), Some((upload(device, queue, img), depth_view, motion_view)))
             }
@@ -272,7 +257,6 @@ impl Pipeline {
         enc
     }
 
-
     fn encode(&self, queue: &wgpu::Queue, enc: &mut wgpu::CommandEncoder, view: &wgpu::TextureView, u: &Uniforms, clear: bool) {
         queue.write_buffer(&self.uniforms, 0, bytemuck::bytes_of(u));
         {
@@ -296,7 +280,6 @@ impl Pipeline {
     }
 }
 
-
 fn uniforms(size: [f32; 2], time: f32, f: &FrameInputs, scale: f32) -> Uniforms {
     let s2 = |v: [f32; 2]| [v[0] * scale, v[1] * scale];
     let ripple = [f.ripple[0] * scale, f.ripple[1] * scale, f.ripple[2], f.ripple[3]];
@@ -304,7 +287,6 @@ fn uniforms(size: [f32; 2], time: f32, f: &FrameInputs, scale: f32) -> Uniforms 
     let grade = [f.grade[0], f.grade[1], f.grade[2], f.life];
     Uniforms { resolution: size, canvas: s2(f.canvas), origin: s2(f.origin), cursor: f.cursor, time, speed: 1.0, intensity: f.intensity, depth: f.depth, tint: f.tint, ripple, grade }
 }
-
 
 struct Downscale {
     scale: f32,
@@ -425,7 +407,6 @@ impl Scene {
         (self.config.width, self.config.height)
     }
 
-
     pub fn set_layer(&mut self, gpu: &Gpu, name: Option<&str>) {
         let current = self.layer.as_ref().map(|(n, _)| *n);
         if current == name {
@@ -436,7 +417,6 @@ impl Scene {
             _ => None,
         };
     }
-
 
     pub fn set_quality(&mut self, gpu: &Gpu, quality: f32) {
         let q = quality.clamp(0.25, 1.0);
@@ -483,7 +463,6 @@ impl Scene {
         Ok(())
     }
 }
-
 
 pub fn snapshot(gpu: &mut Gpu, source: &Source, width: u32, height: u32, time: f32) -> anyhow::Result<image::RgbaImage> {
     let Device { device, queue, .. } = gpu.device(None)?;
@@ -580,7 +559,6 @@ fn upload(device: &wgpu::Device, queue: &wgpu::Queue, img: &image::RgbaImage) ->
 mod tests {
     use super::*;
 
-
     #[test]
     fn presets_are_valid_wgsl() {
         for (name, src) in PRESETS.iter().copied().chain(LAYERS.iter().copied()).chain([("photo", PHOTO), ("blit", "")]) {
@@ -600,19 +578,16 @@ mod tests {
     }
 }
 
-
 pub fn is_web(path: &str) -> bool {
     let p = Path::new(path);
     let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
     ext == "html" || ext == "htm" || p.join("index.html").is_file()
 }
 
-
 pub fn web_entry(path: &str) -> String {
     let p = Path::new(path);
     if p.is_dir() { p.join("index.html").to_string_lossy().into_owned() } else { path.to_string() }
 }
-
 
 pub fn is_video(path: &str) -> bool {
     let ext = Path::new(path).extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();

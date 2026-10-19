@@ -1,5 +1,3 @@
-
-
 import { send } from "./actions";
 import { PRESETS } from "./presets";
 import { useStore } from "./store";
@@ -36,11 +34,9 @@ export function duplicate(id: string) {
   return copy.id;
 }
 
-
 export function tagSource(tag: string): Source {
   return { type: "tag", tag, builtin: PRESETS.filter((p) => p.tags.includes(tag)).map((p) => p.path) };
 }
-
 
 export const DAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
 export const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -124,14 +120,12 @@ export function changesWallpaper(a: Action): boolean {
   return a.type === "play" || a.type === "random" || a.type === "next";
 }
 
-
 export function title(a: Automation): string {
   if (a.name) return a.name;
   const what = a.action.type === "play" ? `Play ${wallpaperName(a.action.path)}` : a.action.type === "random" || a.action.type === "next" ? `${a.action.type === "random" ? "Random" : "Next"} from ${sourceText(a.action.source)}` : actionVerb(a.action)[0].toUpperCase() + actionVerb(a.action).slice(1);
   const when = triggerText(a.trigger);
   return `${what} ${when}`;
 }
-
 
 export function toMinutes(at: string): number | null {
   const m = /^(\d{1,2}):(\d{2})$/.exec(at.trim());
@@ -145,9 +139,7 @@ export function fromMinutes(m: number): string {
   return `${String(Math.floor(v / 60)).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`;
 }
 
-
 export const weekday = (d: Date) => (d.getDay() + 6) % 7;
-
 
 export function nextRun(a: Automation, now = new Date()): string | null {
   if (!a.enabled || a.trigger.type !== "at") return null;
@@ -171,7 +163,6 @@ export function ago(unix: number): string {
   if (s < 86400) return `${Math.round(s / 3600)} h ago`;
   return `${Math.round(s / 86400)} d ago`;
 }
-
 
 const base = { name: "", enabled: true, days: [] as number[], screens: [] as string[], respect_manual: false, undo_after: false };
 
@@ -244,11 +235,9 @@ export function blank(): Omit<Automation, "id"> {
   return { ...base, trigger: { type: "at", time: fromMinutes(Math.ceil((now.getHours() * 60 + now.getMinutes() + 1) / 15) * 15) }, action: { type: "random", source: { type: "favourites" }, same_everywhere: true }, respect_manual: true };
 }
 
-
 export function rotationFor(monitor: string): Automation | undefined {
   return all().find((a) => a.trigger.type === "every" && changesWallpaper(a.action) && a.screens.length === 1 && a.screens[0] === monitor);
 }
-
 
 export function rotateThrough(monitor: string, paths: string[], label: string, every = 60) {
   const source: Source = { type: "list", paths, label };
@@ -263,14 +252,12 @@ export function rotateThrough(monitor: string, paths: string[], label: string, e
   useStore.getState().toast("ok", `${monitor} now changes every hour through “${label}”`, { label: "Edit", run: () => useStore.getState().setFocusAutomation(id) });
 }
 
-
 export function setRotateEvery(monitor: string, every: number | null) {
   const existing = rotationFor(monitor);
   if (every === null) return existing && update(existing.id, { enabled: false });
   if (existing) return update(existing.id, { enabled: true, trigger: { ...existing.trigger, type: "every", minutes: every } as Trigger });
   add({ ...base, screens: [monitor], trigger: { type: "every", minutes: every }, action: { type: "random", source: { type: "favourites" }, same_everywhere: true } });
 }
-
 
 export function forScreen(monitor: string): Automation[] {
   return all().filter((a) => a.enabled && changesWallpaper(a.action) && (!a.screens.length || a.screens.includes(monitor)));

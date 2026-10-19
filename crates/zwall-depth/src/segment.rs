@@ -1,5 +1,3 @@
-
-
 use anyhow::Context;
 use image::{imageops::FilterType, RgbImage, RgbaImage};
 use ort::{session::Session, value::Tensor};
@@ -9,12 +7,10 @@ const MODEL_URL: &str = "https://huggingface.co/Xenova/segformer-b0-finetuned-ad
 const MODEL_FILE: &str = "segformer-b0-ade-q.onnx";
 const SIDE: u32 = 512;
 
-
 const SKY: &[usize] = &[2];
 const WATER: &[usize] = &[21, 26, 60, 104, 113, 128];
 const PLANTS: &[usize] = &[4, 9, 17, 66, 72];
 const LIGHTS: &[usize] = &[36, 82];
-
 
 #[derive(Debug, Clone, Default)]
 pub struct Found {
@@ -52,7 +48,6 @@ impl SceneModel {
     pub fn load(model: &Path) -> anyhow::Result<Self> {
         Ok(Self { session: Session::builder()?.commit_from_file(model).with_context(|| format!("loading {}", model.display()))? })
     }
-
 
     pub fn motion_map(&mut self, photo: &RgbImage, width: u32) -> anyhow::Result<(RgbaImage, Found)> {
         let small = image::imageops::resize(photo, SIDE, SIDE, FilterType::Triangle);
@@ -103,6 +98,10 @@ impl SceneModel {
         }
         let height = ((width as f32 / photo.width() as f32) * photo.height() as f32).round().max(1.0) as u32;
         let big = image::imageops::resize(&map, width, height, FilterType::Triangle);
-        Ok((image::imageops::blur(&big, 3.0), found))
+        let mut out = image::imageops::blur(&big, 3.0);
+        for p in out.pixels_mut() {
+            p.0[3] = 255 - p.0[3];
+        }
+        Ok((out, found))
     }
 }

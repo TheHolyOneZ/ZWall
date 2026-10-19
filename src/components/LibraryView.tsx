@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Clock, EyeOff, FolderSync, FolderX, Film, FolderHeart, FolderInput, Globe, Heart, ImageIcon, LayoutGrid, MonitorPlay, Plus, Repeat, Search, Sparkles, Tag as TagIcon, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -24,7 +22,6 @@ import { contextMenu } from "./ui/Menu";
 import { Dropdown } from "./ui/Dropdown";
 
 const DISPLAY_KEY = "zwall.library.display";
-
 
 type DropTarget = { kind: "tag"; tag: string } | { kind: "fav" } | { kind: "live" } | { kind: "col"; id: string };
 
@@ -68,11 +65,9 @@ export function LibraryView() {
     try {
       localStorage.setItem(DISPLAY_KEY, d);
     } catch {
-
     }
   };
   const { select, inspect } = useStore.getState();
-
 
   useEffect(() => {
     if (selected.length === 1) inspect(selected[0].id);
@@ -93,7 +88,6 @@ export function LibraryView() {
       } else if (!typing && e.key === "Enter" && selected.length === 1 && target) {
         place(selected[0], target);
       } else if (!typing && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) && shown.length) {
-
         e.preventDefault();
         const cols = gridRef.current ? getComputedStyle(gridRef.current).gridTemplateColumns.split(" ").length : 1;
         const at = selected.length ? shown.findIndex((w) => w.id === selected[selected.length - 1].id) : -1;
@@ -127,13 +121,11 @@ export function LibraryView() {
   };
 
   const menuFor = (w: Wallpaper, e: React.MouseEvent) => {
-
     const cur = useStore.getState().selected;
     const ws = cur.includes(w.id) ? library.filter((x) => cur.includes(x.id)) : [w];
     if (!cur.includes(w.id)) select([w.id], w.id);
     contextMenu(e, wallpaperMenu(ws, { viewingTag, viewingCollection: q.collection?.startsWith("user:") ? q.collection.slice(5) : undefined }));
   };
-
 
   const startDrag = (w: Wallpaper, e: React.PointerEvent) => {
     if (e.button !== 0) return;
@@ -357,7 +349,6 @@ const COLLECTIONS: [Collection, string, typeof Heart][] = [
 
 const TOP_TAGS = 16;
 
-
 interface SidebarPrefs {
   folded: string[];
 
@@ -378,12 +369,10 @@ function useSidebarPrefs(): [SidebarPrefs, (p: SidebarPrefs) => void] {
     try {
       localStorage.setItem("zwall.sidebar", JSON.stringify(p));
     } catch {
-
     }
   };
   return [prefs, save];
 }
-
 
 function ordered(keys: string[], saved: string[] | undefined): string[] {
   if (!saved?.length) return keys;
@@ -397,7 +386,6 @@ const GROUPS: [string, string][] = [
   ["size", "Size"],
   ["tags", "Tags"],
 ];
-
 
 function userCollectionMenu(c: UserCollection, show: () => void, hide: () => void): MenuItem[] {
   const st = useStore.getState();
@@ -445,7 +433,6 @@ function Sidebar({ q, setQ, counts, collectionCount, sizeCount, tags, over, filt
     hide(id, true);
     useStore.getState().toast("ok", `Hid “${label(id) ?? "it"}”. Right-click the sidebar to bring it back.`);
   };
-
 
   const typeKeys = ordered(TYPES.map(([k]) => k), prefs.order.type).filter((k) => !isHidden(`type:${k}`));
   const colKeys = ordered([...COLLECTIONS.map(([c]) => c as string), ...cols.map(userKey)], prefs.order.collections).filter((k) => !isHidden(k));

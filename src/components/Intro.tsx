@@ -1,5 +1,3 @@
-
-
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const KEY = "zwall.intro";
@@ -18,10 +16,8 @@ export function setIntroEnabled(on: boolean) {
   try {
     localStorage.setItem(KEY, on ? "on" : "off");
   } catch {
-
   }
 }
-
 
 const TOP_BAR = "210,195 815,195 815,320 210,320";
 const BOTTOM_BAR = "210,705 815,705 815,830 210,830";
@@ -34,7 +30,6 @@ const STARS: [number, number, number][] = [
   [640, 262, 3.2], [700, 300, 2.2], [760, 245, 2.6], [585, 330, 2], [668, 372, 3.4], [520, 410, 2.2],
   [744, 330, 1.8], [610, 455, 2], [470, 470, 1.6], [560, 280, 1.6], [705, 425, 1.8], [500, 360, 1.4],
 ];
-
 
 function Scene({ id }: { id: string }) {
   return (
@@ -64,7 +59,6 @@ function Scene({ id }: { id: string }) {
     </>
   );
 }
-
 
 export function introWanted(): boolean {
   return !played && introEnabled();
@@ -98,7 +92,6 @@ export function Intro({ onLeave }: { onLeave(): void }) {
       window.removeEventListener("keydown", skip);
     };
   }, [on]);
-
 
   const box = useRef<HTMLDivElement>(null);
   const full = useRef<SVGSVGElement>(null);

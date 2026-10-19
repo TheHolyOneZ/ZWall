@@ -1,5 +1,3 @@
-
-
 import { motion } from "motion/react";
 
 export function Switch({ on, label, disabled, onChange }: { on: boolean; label: string; disabled?: boolean; onChange(v: boolean): void }) {

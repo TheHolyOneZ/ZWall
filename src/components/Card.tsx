@@ -1,5 +1,3 @@
-
-
 import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from "motion/react";
 import { Heart } from "lucide-react";
 import { useRef, useState } from "react";
@@ -84,7 +82,6 @@ export function Card({ w, index, active }: { w: Wallpaper; index: number; active
         onPointerDown={onPointerDown}
         onContextMenu={(e) => contextMenu(e, wallpaperMenu([w]))}
         onKeyDown={(e) => {
-
           if (e.key === "Enter" || e.key === " ") (e.preventDefault(), useStore.getState().inspect(w.id));
         }}
       >

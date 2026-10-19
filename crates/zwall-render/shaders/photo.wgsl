@@ -22,7 +22,8 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4f {
         let d = textureSampleLevel(depthTex, samp, uv, 0.0).r;
         uv = uv0 - shift * (d - 0.4);
     }
-    let m = textureSampleLevel(motionTex, samp, uv, 0.0) * F.grade.w;
+    let raw = textureSampleLevel(motionTex, samp, uv, 0.0);
+    let m = vec4f(raw.rgb, 1.0 - raw.a) * F.grade.w;
     let t = F.time;
 
     let near = 1.0 - smoothstep(0.0, 0.3, distance(screen, F.cursor * 0.5 + 0.5));

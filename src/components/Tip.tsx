@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useRef, useState } from "react";
 

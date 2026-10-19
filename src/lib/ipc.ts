@@ -1,5 +1,3 @@
-
-
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
@@ -7,7 +5,6 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { pairs as deskPairs } from "./desk";
 import type { EngineState, LibraryItem, Request } from "./types";
-
 
 export interface Found {
   path: string;
@@ -24,7 +21,6 @@ export interface Found {
 }
 
 export const inTauri = "__TAURI_INTERNALS__" in window;
-
 
 export const assetUrl = (path: string | undefined | null) => (path && inTauri ? convertFileSrc(path) : null);
 
@@ -175,7 +171,6 @@ function mockBridge(): Bridge {
       if (req === "ClearManual") state.manual = {};
       else if (req === "Resume") state.paused = "none";
       else if (typeof req === "object") {
-
         const breakSpans = (names: string[]) => {
           const groups = state.monitors.filter((m) => names.includes(m.name) && m.span).map((m) => m.span);
           state.monitors.forEach((m) => groups.includes(m.span) && (m.span = null));
@@ -210,7 +205,6 @@ function mockBridge(): Bridge {
         } else if ("SetBlendLinks" in req) {
           state.blend_links = req.SetBlendLinks;
         } else if ("SetWatches" in req) {
-
           for (const w of req.SetWatches.filter((w) => !state.watches.some((x) => x.id === w.id))) {
             const all: LibraryItem[] = [
               { path: `${w.path}/clips/ocean 4k.mp4`, name: "ocean 4k", kind: "video" },
@@ -272,7 +266,6 @@ function mockBridge(): Bridge {
     onError: async () => () => {},
     onNotice: async () => () => {},
     async onFileDrop(fn) {
-
       const over = (e: DragEvent) => (e.preventDefault(), fn({ type: "over", paths: [] }));
       const leave = (e: DragEvent) => !e.relatedTarget && fn({ type: "leave", paths: [] });
       const drop = (e: DragEvent) => {

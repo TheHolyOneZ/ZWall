@@ -1,5 +1,3 @@
-
-
 use crate::server::Hub;
 use std::{
     io::Read,
@@ -9,12 +7,10 @@ use std::{
 };
 use zwall_ipc::{LibraryItem, Request};
 
-
 pub fn duration(path: &str) -> Option<f32> {
     let out = crate::desktop::command("ffprobe").args(["-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", path]).output().ok()?;
     String::from_utf8_lossy(&out.stdout).trim().parse().ok()
 }
-
 
 pub fn video_size(path: &str) -> Option<(u32, u32)> {
     let out = crate::desktop::command("ffprobe").args(["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", path]).output().ok()?;
@@ -34,7 +30,6 @@ const W: usize = 64;
 const H: usize = 36;
 const FPS: f32 = 10.0;
 
-
 fn frames(path: &str, from: f32, to: f32) -> anyhow::Result<Vec<Vec<u8>>> {
     let mut child = crate::desktop::command("ffmpeg")
         .args(["-v", "error", "-ss", &format!("{from:.3}"), "-t", &format!("{:.3}", (to - from).max(0.1)), "-i", path])
@@ -50,7 +45,6 @@ fn frames(path: &str, from: f32, to: f32) -> anyhow::Result<Vec<Vec<u8>>> {
 fn diff(a: &[u8], b: &[u8]) -> u64 {
     a.iter().zip(b).map(|(x, y)| (*x as i32 - *y as i32).unsigned_abs() as u64).sum()
 }
-
 
 pub fn best_end(path: &str, start: f32, end: f32) -> anyhow::Result<f32> {
     let first = frames(path, start, start + 0.1)?.into_iter().next().ok_or_else(|| anyhow::anyhow!("no frames"))?;
@@ -79,7 +73,6 @@ pub fn make(hub: Arc<Hub>, path: String, start: f32, end: f32, crossfade: f32, f
             std::fs::create_dir_all(&dir)?;
             let stem = Path::new(&path).file_stem().map_or("video".into(), |s| s.to_string_lossy().into_owned());
             let out = dir.join(format!("{stem}-loop-{:.0}-{:.0}.mp4", start * 10.0, end * 10.0));
-
 
             let mut filter = format!(
                 "[0:v]split[a][b];[a]trim=start={f},setpts=PTS-STARTPTS[main];[b]trim=0:{f},setpts=PTS-STARTPTS[head];[main][head]xfade=transition=fade:duration={f}:offset={off}[v]",

@@ -1,8 +1,5 @@
-
-
 use crate::server::Hub;
 use zwall_render::image::{self, RgbaImage};
-
 
 pub fn dominant(img: &RgbaImage) -> [u8; 3] {
     let small = image::imageops::thumbnail(img, 48, 27);
@@ -63,7 +60,6 @@ impl AccentSync {
         Self { last: None }
     }
 
-
     pub fn tick(&mut self, hub: &Hub) {
         let s = hub.snapshot();
         if !s.settings.match_accent {
@@ -107,7 +103,6 @@ mod tests {
 
     #[test]
     fn picks_the_colour_not_the_grey() {
-
         let img = RgbaImage::from_fn(96, 54, |x, _| if x < 70 { image::Rgba([40, 40, 44, 255]) } else { image::Rgba([240, 120, 40, 255]) });
         let [r, g, b] = dominant(&img);
         assert!(r > g && g > b, "{r} {g} {b}");

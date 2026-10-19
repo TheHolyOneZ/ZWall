@@ -1,5 +1,3 @@
-
-
 import type { BlendLink, EngineState, Monitor } from "./types";
 
 export function onDesk(m: Monitor, arrangement: Record<string, [number, number]> | undefined): Monitor {
@@ -12,7 +10,6 @@ export const tolerance = (len: number) => Math.max(64, len * 0.05);
 export function blendKey(a: string, b: string) {
   return `${a}|${b}`;
 }
-
 
 export function pairs(st: EngineState): BlendLink[] {
   const ms = st.monitors.map((m) => onDesk(m, st.arrangement));

@@ -1,5 +1,3 @@
-
-
 import { ChevronDown } from "lucide-react";
 import { useRef } from "react";
 import { useStore } from "../../lib/store";

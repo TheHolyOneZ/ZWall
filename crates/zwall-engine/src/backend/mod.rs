@@ -1,5 +1,3 @@
-
-
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle};
 use zwall_ipc::Monitor;
 
@@ -16,14 +14,12 @@ pub mod windows;
 #[cfg(target_os = "linux")]
 pub mod x11;
 
-
 pub struct SurfaceHandles {
     pub display: RawDisplayHandle,
     pub window: RawWindowHandle,
 
     pub native: u64,
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Rect {
@@ -33,7 +29,6 @@ pub struct Rect {
     pub h: u32,
 }
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Hotkey {
     Pause,
@@ -41,10 +36,8 @@ pub enum Hotkey {
     Next,
 }
 
-
 #[derive(Debug, Default)]
 pub struct Input {
-
     pub clicks: Vec<(i32, i32)>,
     pub hotkeys: Vec<Hotkey>,
 }
@@ -56,14 +49,11 @@ pub struct Pointer {
 }
 
 pub trait Backend {
-
     fn name(&self) -> &'static str;
 
     fn monitors(&mut self) -> anyhow::Result<Vec<Monitor>>;
 
-
     fn create_surface(&mut self, key: &str, rect: Rect) -> anyhow::Result<SurfaceHandles>;
-
 
     fn create_overlay(&mut self, key: &str, _rect: Rect) -> anyhow::Result<SurfaceHandles> {
         anyhow::bail!("{key}: full-screen overlays aren't supported here")
@@ -73,7 +63,6 @@ pub trait Backend {
     fn pointer(&self) -> Option<Pointer> {
         None
     }
-
 
     fn pump(&mut self) -> Input {
         Input::default()
@@ -87,7 +76,6 @@ pub trait Backend {
         0
     }
 
-
     fn covered(&self, _rect: Rect) -> Option<f32> {
         None
     }
@@ -96,12 +84,10 @@ pub trait Backend {
         false
     }
 
-
     fn surfaces_lost(&mut self) -> bool {
         false
     }
 }
-
 
 pub fn detect() -> anyhow::Result<Box<dyn Backend>> {
     #[cfg(target_os = "linux")]
@@ -119,12 +105,10 @@ pub fn detect() -> anyhow::Result<Box<dyn Backend>> {
             return Ok(Box::new(kwin::KWin::connect()?));
         }
 
-
         if is("gnome") && std::env::var_os("DISPLAY").is_some() {
             return Ok(Box::new(x11::X11::connect()?));
         }
         if std::env::var_os("WAYLAND_DISPLAY").is_some() {
-
             if desktop.split(':').any(|d| d.eq_ignore_ascii_case("gnome")) {
                 return Ok(Box::new(gnome::Gnome));
             }

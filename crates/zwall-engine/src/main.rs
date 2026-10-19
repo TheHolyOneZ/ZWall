@@ -1,7 +1,4 @@
-
-
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
-
 
 mod accent;
 mod automation;
@@ -45,14 +42,12 @@ fn main() -> anyhow::Result<()> {
     }
     logger.init();
 
-
     let args: Vec<String> = std::env::args().collect();
     if args.get(1).map(String::as_str) == Some("ctl") {
         return ctl(args.get(2).map(String::as_str).unwrap_or(""));
     }
 
     let mut backend = backend::detect()?;
-
 
     if std::env::args().any(|a| a == "--probe") {
         println!("backend     {}", backend.name());
@@ -94,7 +89,6 @@ fn main() -> anyhow::Result<()> {
         signal_hook::flag::register(SIGTERM, stop.clone())?;
     }
 
-
     let listener = server::bind()?;
 
     for m in hub.snapshot().monitors {
@@ -109,15 +103,16 @@ fn main() -> anyhow::Result<()> {
     let h = hub.clone();
     std::thread::spawn(move || h.set_fonts(widgets::fonts()));
 
-
     #[cfg(target_os = "linux")]
     if std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default().split(':').any(|d| d.eq_ignore_ascii_case("kde")) {
         kwin_bridge::start();
     }
     let plasma = std::env::var("ZWALL_HOST").as_deref() != Ok("window") && plasma::available();
     if plasma {
-        if let Err(e) = plasma::install() {
-            log::warn!("plasma: couldn't install the wallpaper plugin: {e:#}");
+        match plasma::install() {
+            Ok(true) if plasma::in_use() => plasma::restart_shell(),
+            Ok(_) => {}
+            Err(e) => log::warn!("plasma: couldn't install the wallpaper plugin: {e:#}"),
         }
         hub.set_backend("plasma");
         let feed = feed::Feed::start()?;

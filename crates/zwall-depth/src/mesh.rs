@@ -1,13 +1,9 @@
-
-
 use crate::DepthMap;
 
 pub struct Mesh {
-
     pub vertices: Vec<[f32; 5]>,
     pub indices: Vec<u32>,
 }
-
 
 pub fn build(_depth: &DepthMap, cols: u32, rows: u32, _strength: f32) -> Mesh {
     let mut vertices = Vec::with_capacity(((cols + 1) * (rows + 1)) as usize);

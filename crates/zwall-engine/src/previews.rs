@@ -1,5 +1,3 @@
-
-
 use crate::server::Hub;
 use std::{
     hash::{Hash, Hasher},
@@ -47,7 +45,6 @@ pub fn request(hub: Arc<Hub>, path: String) {
     });
 }
 
-
 fn facts(hub: &Arc<Hub>, path: &str) {
     if path.starts_with("preset://") || hub.snapshot().facts.contains_key(path) {
         return;
@@ -89,7 +86,6 @@ fn make(path: &str) -> anyhow::Result<String> {
     }
     Ok(out.to_string_lossy().into_owned())
 }
-
 
 fn web(hub: Arc<Hub>, path: String) {
     if hub.snapshot().thumbs.contains_key(&path) {
@@ -140,7 +136,6 @@ struct PhotoQueue {
 
 static PHOTOS: Mutex<Option<PhotoQueue>> = Mutex::new(None);
 
-
 fn photo(hub: Arc<Hub>, path: String) {
     if hub.snapshot().thumbs.contains_key(&path) {
         return;
@@ -183,7 +178,6 @@ fn photo_thumb(path: &str) -> anyhow::Result<String> {
     Ok(out.to_string_lossy().into_owned())
 }
 
-
 fn headless_browser() -> Option<std::path::PathBuf> {
     #[cfg(windows)]
     {
@@ -201,7 +195,6 @@ fn headless_browser() -> Option<std::path::PathBuf> {
         ["chromium", "google-chrome-stable", "google-chrome", "brave"].into_iter().find_map(crate::desktop::on_path)
     }
 }
-
 
 fn file_url(path: &str) -> String {
     let p = path.replace('\\', "/");

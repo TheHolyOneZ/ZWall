@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { importFolder } from "../lib/actions";
 import { importFiles } from "../lib/intake";
@@ -117,7 +115,6 @@ function CreateSlot() {
 
 function Hints() {
   return (
-
     <div className="hidden @[1260px]:block min-w-0 truncate text-[12px]" style={{ color: "var(--text-3)" }}>
       Drag a card onto a screen, or between two to span them. Click a card for its settings.
     </div>

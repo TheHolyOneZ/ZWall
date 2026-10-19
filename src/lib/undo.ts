@@ -1,12 +1,9 @@
-
-
 import { send } from "./actions";
 import { useStore } from "./store";
 import type { Wallpaper } from "./types";
 
 const st = () => useStore.getState();
 const undo = (text: string, run: () => void) => st().toast("ok", text, { label: "Undo", run });
-
 
 export function removeWallpapers(ws: Wallpaper[]) {
   const e = st().engine;
@@ -32,7 +29,6 @@ export function removeWallpapers(ws: Wallpaper[]) {
   });
 }
 
-
 function screens(names: string[] | null) {
   return (st().engine?.monitors ?? []).filter((m) => !names || names.includes(m.name)).map((m) => ({ name: m.name, path: m.wallpaper }));
 }
@@ -46,7 +42,6 @@ export function clearScreen(monitor: string) {
   send({ Clear: { monitor } });
   undo(`Cleared ${monitor}`, () => restore(prev));
 }
-
 
 export function rememberBeforePlacing(target: string): (() => void) | null {
   const names = target === "all" ? null : target.startsWith("span:") ? target.slice(5).split("+") : [target];

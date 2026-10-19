@@ -1,5 +1,3 @@
-
-
 import type { Wallpaper } from "./types";
 
 export const PRESETS: Wallpaper[] = [

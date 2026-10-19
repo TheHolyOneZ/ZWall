@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 import { Clock3, MonitorOff, Move, Power, X } from "lucide-react";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -38,11 +36,9 @@ interface Bridge {
   vertical: boolean;
 }
 
-
 function clampView(v: { s: number; x: number; y: number }, w: number, h: number) {
   return { s: v.s, x: Math.min(0, Math.max(w - w * v.s, v.x)), y: Math.min(0, Math.max(h - h * v.s, v.y)) };
 }
-
 
 interface Xform {
   s: number;
@@ -75,7 +71,6 @@ function layout(monitors: Monitor[], box: { w: number; h: number }, fixed?: Xfor
   const bridges: Bridge[] = [];
   for (const a of monitors)
     for (const b of monitors) {
-
       if (a.x < b.x && Math.abs(a.x + a.width - b.x) <= tolerance(Math.min(a.width, b.width))) {
         const top = Math.max(a.y, b.y), bottom = Math.min(a.y + a.height, b.y + b.height);
         if (bottom > top)
@@ -89,7 +84,6 @@ function layout(monitors: Monitor[], box: { w: number; h: number }, fixed?: Xfor
     }
   return { placed, bridges, xf };
 }
-
 
 function spanCanvas(p: Placed, placed: Placed[]) {
   const group = p.m.span ? placed.filter((q) => q.m.span === p.m.span) : [p];
@@ -108,7 +102,6 @@ export function Stage() {
   const ref = useRef<HTMLDivElement>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
 
-
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
   const px = useSpring(rawX, { stiffness: 120, damping: 20 });
@@ -121,9 +114,7 @@ export function Stage() {
     return () => ro.disconnect();
   }, []);
 
-
   const usable = box;
-
 
   const [frac, setFrac] = useState({ s: 1, fx: 0, fy: 0 });
   const view = { s: frac.s, x: frac.fx * box.w, y: frac.fy * box.h };
@@ -202,7 +193,6 @@ export function Stage() {
         });
       }}
       onPointerDown={(e) => {
-
         const empty = !(e.target as HTMLElement).closest(".bezel, button, [data-marker], .pointer-events-auto");
         if (!(e.button === 1 || (e.button === 0 && empty && view.s > 1))) return;
         e.preventDefault();
@@ -436,14 +426,19 @@ function Asleep() {
         <div className="text-[13px] max-w-[340px]" style={{ color: "var(--text-2)" }}>
           It runs on its own so your wallpapers keep playing when this window closes.
         </div>
-        <motion.button className="btn btn-primary" whileTap={{ scale: 0.97 }} onClick={async () => (await bridge).wake()}>
+        <motion.button className="btn btn-primary" whileTap={{ scale: 0.97 }} onClick={async () => {
+            try {
+              await (await bridge).wake();
+            } catch (e) {
+              useStore.getState().toast("error", String(e));
+            }
+          }}>
           <Power size={14} /> Wake it
         </motion.button>
       </motion.div>
     </div>
   );
 }
-
 
 function Resting({ monitor }: { monitor: string }) {
   const rest = useStore((s) => s.engine?.resting?.[monitor]);

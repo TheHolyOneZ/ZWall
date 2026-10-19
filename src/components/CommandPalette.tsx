@@ -1,5 +1,3 @@
-
-
 import { add, TEMPLATES, title, update } from "../lib/automations";
 import { folderName, startWatching } from "../lib/watches";
 import { add as addWidget, KINDS as WIDGET_KINDS } from "../lib/widgets";
@@ -61,7 +59,6 @@ function commands(): Command[] {
   }
   return out;
 }
-
 
 function score(c: Command, q: string): number {
   const words = c.label.toLowerCase().replace(/-/g, "").split(/[\s·]+/);

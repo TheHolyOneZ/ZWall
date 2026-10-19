@@ -1,5 +1,3 @@
-
-
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, path::PathBuf};
 use zwall_ipc::State;
@@ -43,7 +41,6 @@ pub struct SavedMonitor {
 }
 
 fn path() -> Option<PathBuf> {
-
     Some(crate::desktop::config_dir()?.join("engine.json"))
 }
 
@@ -57,7 +54,6 @@ pub fn load() -> Saved {
         Err(_) => Saved::default(),
     }
 }
-
 
 pub fn apply(saved: &Saved, state: &mut State) {
     let present: Vec<String> = state.monitors.iter().map(|m| m.name.clone()).collect();

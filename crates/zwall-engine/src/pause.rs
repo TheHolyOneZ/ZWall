@@ -1,7 +1,4 @@
-
-
 use zwall_ipc::{PauseReason, Settings};
-
 
 pub struct Signals {
     pub fullscreen: bool,

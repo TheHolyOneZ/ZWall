@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { Film, FolderOpen, Globe, ImageIcon, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -34,7 +32,6 @@ function Editor({ edit }: { edit: { id?: string; path?: string } }) {
 
   const [target, setTarget] = useState<string>(w.collection ?? "");
   const name = watches.folderName(w.path);
-
 
   useEffect(() => {
     setFound(null);

@@ -1,5 +1,3 @@
-
-
 import { send } from "./actions";
 import { bridge } from "./ipc";
 import { useStore } from "./store";
@@ -48,7 +46,6 @@ export async function importPaths(paths: string[]) {
   }
   if (added) toast("ok", added === 1 ? "On your shelf · drag it onto a screen" : `${added} new wallpapers on your shelf`);
 }
-
 
 export async function importFiles() {
   const paths = await (await bridge).pickFiles();

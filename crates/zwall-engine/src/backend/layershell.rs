@@ -1,5 +1,3 @@
-
-
 use super::{Backend, Input, Pointer, Rect, SurfaceHandles};
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle, WaylandDisplayHandle, WaylandWindowHandle};
 use smithay_client_toolkit::{

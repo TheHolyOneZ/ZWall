@@ -1,7 +1,4 @@
-
-
 use std::time::Instant;
-
 
 pub fn fonts() -> Vec<String> {
     #[cfg(not(windows))]
@@ -24,7 +21,6 @@ pub fn fonts() -> Vec<String> {
     }
 }
 
-
 pub struct Stats {
     last_cpu: Option<(u64, u64)>,
     last: Option<Instant>,
@@ -34,7 +30,6 @@ impl Stats {
     pub fn new() -> Self {
         Self { last_cpu: None, last: None }
     }
-
 
     pub fn sample(&mut self) -> Option<serde_json::Value> {
         if self.last.is_some_and(|t| t.elapsed().as_secs_f32() < 2.0) {
@@ -65,14 +60,12 @@ impl Stats {
     }
 }
 
-
 fn ram() -> Option<(u64, u64)> {
     let text = std::fs::read_to_string("/proc/meminfo").ok()?;
     let get = |k: &str| text.lines().find(|l| l.starts_with(k))?.split_whitespace().nth(1)?.parse::<u64>().ok();
     let (total, avail) = (get("MemTotal:")?, get("MemAvailable:")?);
     Some(((total - avail) / 1024, total / 1024))
 }
-
 
 fn battery() -> Option<(u32, bool)> {
     let dir = std::fs::read_dir("/sys/class/power_supply").ok()?.flatten().map(|e| e.path()).find(|p| p.file_name().is_some_and(|n| n.to_string_lossy().starts_with("BAT")))?;

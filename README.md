@@ -8,7 +8,7 @@
 Animated, interactive and 3D wallpapers, a real wallpaper library, automations, desktop widgets,<br/>
 and multi-monitor blending. A Wallpaper Engine alternative that runs natively on KDE Plasma.
 
-[![Version](https://img.shields.io/badge/version-0.1.0-f3efe6?style=flat-square)](https://github.com/TheHolyOneZ/ZWall/releases)
+[![Version](https://img.shields.io/badge/version-0.1.1-f3efe6?style=flat-square)](https://github.com/TheHolyOneZ/ZWall/releases)
 [![Licence: GPL-3.0](https://img.shields.io/badge/licence-GPL--3.0-6d5bff?style=flat-square)](LICENSE)
 [![Linux](https://img.shields.io/badge/Linux-KDE%20Plasma%20%C2%B7%20Hyprland%20%C2%B7%20GNOME-22d3a6?style=flat-square&logo=linux&logoColor=white)](#where-it-runs)
 [![Windows](https://img.shields.io/badge/Windows-10%20%C2%B7%2011-4b7bff?style=flat-square&logo=windows&logoColor=white)](#where-it-runs)
@@ -231,7 +231,7 @@ Features that need the KDE Plasma plugin (web wallpapers, widgets, edge blending
 
 ## Install
 
-> **Version 0.1.0** is the first release. Packages appear on the [Releases page](https://github.com/TheHolyOneZ/ZWall/releases) and at [zsync.eu/zwall](https://zsync.eu/zwall/).
+> **Version 0.1.1** fixes the wallpaper engine not starting after install on Linux and Windows. If you installed 0.1.0, please update. Packages appear on the [Releases page](https://github.com/TheHolyOneZ/ZWall/releases) and at [zsync.eu/zwall](https://zsync.eu/zwall/). What changed: [CHANGELOG.md](CHANGELOG.md).
 
 **Linux runtime needs:** WebKitGTK 4.1, libmpv (video wallpapers), and optionally ffmpeg (moving video previews and the loop maker), Chromium or Chrome (web page previews) and libjxl's `cjxl` (smaller `.zwall` exports).
 
@@ -247,7 +247,7 @@ Debian / Ubuntu:
 sudo apt install libwebkit2gtk-4.1-0 libmpv2 ffmpeg libjxl-tools
 ```
 
-**Windows:** the installer bundles the engine. Video wallpapers need mpv (bundled when available, otherwise `scoop install mpv`).
+**Windows:** the installer bundles the engine and the Microsoft Visual C++ runtime it needs, so nothing else has to be installed. Video wallpapers need mpv (bundled when available, otherwise `scoop install mpv`).
 
 ---
 
@@ -292,6 +292,9 @@ Also used: libmpv (video), ffmpeg (previews, loops), x11rb, smithay-client-toolk
 ---
 
 ## FAQ
+
+**The app says "The wallpaper engine is asleep" and it won't wake up.**<br/>
+That was a packaging bug in 0.1.0: on Linux the engine was installed without permission to run, and on Windows it was missing the Visual C++ runtime. Update to 0.1.1. On 0.1.0 you can work around it with `sudo chmod +x /usr/bin/zwall-engine` (Linux) or by installing the [Microsoft Visual C++ Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) (Windows). From 0.1.1 the app starts the engine by itself, and if the engine can't start, the app tells you why. The engine's log is at `~/.local/share/zwall/engine.log` (Linux) or `%LOCALAPPDATA%\ZWall\engine.log` (Windows).
 
 **Is ZWall a Wallpaper Engine alternative for Linux?**<br/>
 Yes. It plays animated, video, web and shader wallpapers natively on Linux, and imports Wallpaper Engine's video and web wallpapers from your Steam library. It doesn't run Wallpaper Engine *scene* wallpapers.

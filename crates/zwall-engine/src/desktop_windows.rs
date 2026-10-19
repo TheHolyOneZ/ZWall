@@ -1,5 +1,3 @@
-
-
 use std::{
     path::PathBuf,
     sync::Mutex,
@@ -25,21 +23,17 @@ fn env_dir(var: &str) -> Option<PathBuf> {
     std::env::var_os(var).map(PathBuf::from)
 }
 
-
 pub fn data_dir() -> PathBuf {
     env_dir("LOCALAPPDATA").or_else(|| env_dir("USERPROFILE").map(|p| p.join("AppData").join("Local"))).unwrap_or_else(std::env::temp_dir).join("ZWall")
 }
-
 
 pub fn cache_dir() -> Option<PathBuf> {
     Some(data_dir().join("cache"))
 }
 
-
 pub fn config_dir() -> Option<PathBuf> {
     Some(env_dir("APPDATA").or_else(|| env_dir("USERPROFILE").map(|p| p.join("AppData").join("Roaming")))?.join("ZWall"))
 }
-
 
 pub fn accent() -> Option<String> {
     let mut value = 0u32;
@@ -55,7 +49,6 @@ pub fn accent() -> Option<String> {
     Some(format!("#{r:02x}{g:02x}{b:02x}"))
 }
 
-
 pub fn on_battery() -> bool {
     let mut s = SYSTEM_POWER_STATUS::default();
 
@@ -66,11 +59,9 @@ pub fn on_battery() -> bool {
     s.ACLineStatus == 0 && s.BatteryFlag != 128
 }
 
-
 pub fn process_names() -> Vec<String> {
     processes().into_iter().map(|(_, n)| n).collect()
 }
-
 
 fn processes() -> Vec<(u32, String)> {
     let mut out = Vec::new();
@@ -90,18 +81,14 @@ fn processes() -> Vec<(u32, String)> {
     out
 }
 
-
 pub fn idle_inhibited() -> bool {
-
     match unsafe { SHQueryUserNotificationState() } {
         Ok(state) => state == QUNS_BUSY || state == QUNS_RUNNING_D3D_FULL_SCREEN || state == QUNS_PRESENTATION_MODE,
         Err(_) => false,
     }
 }
 
-
 pub fn screen_locked() -> bool {
-
     unsafe {
         let Ok(desk) = OpenInputDesktop(DESKTOP_CONTROL_FLAGS(0), false, DESKTOP_READOBJECTS) else { return true };
         let mut name = [0u16; 64];
@@ -115,7 +102,6 @@ pub fn screen_locked() -> bool {
         !String::from_utf16_lossy(&name[..len]).eq_ignore_ascii_case("default")
     }
 }
-
 
 pub fn others_playing() -> bool {
     static CACHE: Mutex<Option<(Instant, bool)>> = Mutex::new(None);
@@ -134,7 +120,6 @@ fn audio_sessions_playing() -> windows::core::Result<bool> {
     let me = std::process::id();
     let names = processes();
     let ours = |pid: u32| pid == me || pid == 0 || names.iter().any(|(p, n)| *p == pid && (n.starts_with("zwall") || n == "mpv"));
-
 
     unsafe {
         let _ = CoInitializeEx(None, COINIT_MULTITHREADED);

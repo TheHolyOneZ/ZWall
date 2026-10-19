@@ -1,10 +1,6 @@
-
-
 use libmpv2::Mpv;
 
 pub struct Video {
-
-
     gl: Option<gl::GlTarget>,
     mpv: Mpv,
     paused: bool,
@@ -37,7 +33,6 @@ impl Video {
         Ok(Self { gl: None, mpv, paused: false, volume: 0.0, speed: 1.0 })
     }
 
-
     pub fn new_wayland(display: *mut std::ffi::c_void, surface: *mut std::ffi::c_void, w: u32, h: u32, path: &str) -> anyhow::Result<Self> {
         let mpv = Mpv::with_initializer(|i| {
             i.set_option("vo", "libmpv")?;
@@ -57,7 +52,6 @@ impl Video {
         Ok(Self { gl: Some(gl), mpv, paused: false, volume: 0.0, speed: 1.0 })
     }
 
-
     pub fn draw(&mut self) {
         if let Some(gl) = &mut self.gl {
             gl.draw();
@@ -70,7 +64,6 @@ impl Video {
             let _ = self.mpv.set_property("pause", paused);
         }
     }
-
 
     pub fn set_volume(&mut self, volume: f64) {
         if (self.volume - volume).abs() > 0.1 {
@@ -89,7 +82,6 @@ impl Video {
 }
 
 mod gl {
-
     use khronos_egl as egl;
     use libmpv2::Mpv;
     use libmpv2_sys as sys;

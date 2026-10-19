@@ -1,5 +1,3 @@
-
-
 pub mod scan;
 
 use serde::{Deserialize, Serialize};
@@ -7,7 +5,6 @@ use std::{
     collections::BTreeMap,
     io::{Read, Seek, Write},
 };
-
 
 pub const FORMAT_VERSION: u32 = 2;
 pub const MANIFEST: &str = "manifest.toml";
@@ -40,7 +37,6 @@ pub enum Kind {
     Scene,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum Param {
@@ -50,11 +46,8 @@ pub enum Param {
     Text(String),
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Packed {
-
-
     pub codec: String,
 
     pub file: String,
@@ -66,7 +59,6 @@ pub struct Packed {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Layer {
     pub kind: Kind,
-
 
     pub source: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -107,14 +99,12 @@ impl Manifest {
     }
 }
 
-
 pub fn read_manifest<R: Read + Seek>(r: R) -> Result<Manifest> {
     let mut zip = zip::ZipArchive::new(r)?;
     let mut s = String::new();
     zip.by_name(MANIFEST)?.read_to_string(&mut s)?;
     Manifest::from_toml(&s)
 }
-
 
 pub fn unpack(p: &Packed, data: &[u8]) -> Result<Vec<u8>> {
     let out = match p.codec.as_str() {
@@ -132,7 +122,6 @@ pub fn unpack(p: &Packed, data: &[u8]) -> Result<Vec<u8>> {
     Ok(out)
 }
 
-
 pub fn read_asset<R: Read + Seek>(zip: &mut zip::ZipArchive<R>, layer: &Layer) -> Result<Vec<u8>> {
     let name = layer.packed.as_ref().map_or(layer.source.as_str(), |p| p.file.as_str());
     let mut data = Vec::new();
@@ -143,9 +132,7 @@ pub fn read_asset<R: Read + Seek>(zip: &mut zip::ZipArchive<R>, layer: &Layer) -
     }
 }
 
-
 pub fn write<W: Write + Seek>(w: W, manifest: &Manifest, assets: &[(&str, &[u8])]) -> Result<()> {
-
     let mut manifest = manifest.clone();
     if manifest.layers.iter().all(|l| l.packed.is_none()) {
         manifest.format = manifest.format.min(1);

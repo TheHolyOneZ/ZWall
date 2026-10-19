@@ -1,5 +1,3 @@
-
-
 use super::Rect;
 use serde_json::Value;
 use std::{
@@ -9,7 +7,6 @@ use std::{
     path::PathBuf,
     time::{Duration, Instant},
 };
-
 
 #[derive(Clone)]
 struct Mon {
@@ -27,7 +24,6 @@ pub struct Hyprland {
 }
 
 impl Hyprland {
-
     pub fn connect() -> Option<Self> {
         let sig = std::env::var("HYPRLAND_INSTANCE_SIGNATURE").ok()?;
         let runtime = std::env::var_os("XDG_RUNTIME_DIR").map(PathBuf::from)?;
@@ -62,7 +58,6 @@ impl Hyprland {
             }
         }).collect()
     }
-
 
     fn to_physical(mons: &[Mon], x: f64, y: f64) -> (i32, i32) {
         let k = mons.iter().find(|m| x >= m.x && y >= m.y && x < m.x + m.w && y < m.y + m.h).map_or(1.0, |m| m.scale.round().max(1.0));
@@ -99,7 +94,6 @@ impl Hyprland {
             _ => false,
         })
     }
-
 
     pub fn covered(&self, rect: Rect) -> Option<f32> {
         let mons = self.monitors();

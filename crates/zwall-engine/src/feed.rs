@@ -1,5 +1,3 @@
-
-
 use std::{
     net::{TcpListener, TcpStream},
     sync::{Arc, Mutex},
@@ -45,7 +43,6 @@ impl Feed {
     pub fn connected(&self) -> bool {
         !self.clients.lock().unwrap().is_empty()
     }
-
 
     pub fn state(&self, json: String) {
         {

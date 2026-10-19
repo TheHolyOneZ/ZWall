@@ -1,5 +1,3 @@
-
-
 use crate::server::Hub;
 use std::{
     collections::BTreeMap,
@@ -81,7 +79,6 @@ pub fn export(hub: Arc<Hub>, path: String, display: Option<String>) {
             let (kind, source, asset) = if path.starts_with("preset://") {
                 (Kind::Shader, path.clone(), None)
             } else if zwall_render::is_web(&path) {
-
                 let entry = PathBuf::from(zwall_render::web_entry(&path));
                 let root = entry.parent().ok_or_else(|| anyhow::anyhow!("bad path"))?.to_path_buf();
                 let mut total = 0u64;
@@ -93,7 +90,6 @@ pub fn export(hub: Arc<Hub>, path: String, display: Option<String>) {
                 let kind = if zwall_render::is_video(&path) { Kind::Video } else { Kind::Parallax };
                 (kind, format!("assets/{file}"), Some(std::fs::read(&path)?))
             };
-
 
             let packed = match (&asset, kind) {
                 (Some(bytes), Kind::Parallax) if is_jpeg(&path) => pack_jpeg(bytes, &format!("{source}.jxl")),
@@ -138,12 +134,10 @@ pub fn import(hub: Arc<Hub>, file: String) {
             let path = if layer.source.starts_with("preset://") {
                 layer.source.clone()
             } else {
-
                 let stem = safe_name(&manifest.name);
                 let dir = crate::desktop::data_dir().join("library").join(format!("{stem}-{:08x}", crc(&file)));
                 std::fs::create_dir_all(&dir)?;
                 let dest = if layer.kind == Kind::Web {
-
                     for i in 0..zip.len() {
                         let mut f = zip.by_index(i)?;
                         let Some(rel) = f.enclosed_name() else { continue };
@@ -193,7 +187,6 @@ fn is_jpeg(path: &str) -> bool {
     Path::new(path).extension().and_then(|e| e.to_str()).is_some_and(|e| e.eq_ignore_ascii_case("jpg") || e.eq_ignore_ascii_case("jpeg"))
 }
 
-
 fn pack_jpeg(original: &[u8], file: &str) -> Option<(zwall_format::Packed, Vec<u8>)> {
     let dir = std::env::temp_dir().join(format!("zwall-pack-{}", std::process::id()));
     std::fs::create_dir_all(&dir).ok()?;
@@ -212,7 +205,6 @@ fn pack_jpeg(original: &[u8], file: &str) -> Option<(zwall_format::Packed, Vec<u
     }
     result
 }
-
 
 fn collect(root: &Path, dir: &Path, out: &mut Vec<(String, Vec<u8>)>, total: &mut u64) -> anyhow::Result<()> {
     const MAX: u64 = 200 * 1024 * 1024;

@@ -1,5 +1,3 @@
-
-
 use crate::link::Link;
 use std::sync::{Arc, Mutex};
 use tauri::{
@@ -106,10 +104,12 @@ fn on_menu(app: &AppHandle, id: &str) {
         }
         "open" => crate::open_window(app),
         "wake" => {
-            let _ = crate::wake_engine_now();
+            if let Err(e) = crate::wake_engine_now(app) {
+                use tauri::Emitter;
+                let _ = app.emit("zwall://error", e);
+            }
         }
         "quit" => app.exit(0),
-
 
         "quit_all" => {
             send(Request::Quit);

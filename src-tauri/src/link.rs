@@ -1,5 +1,3 @@
-
-
 use std::{
     io::BufReader,
     sync::{
@@ -44,6 +42,7 @@ impl Link {
 
     fn run(self: Arc<Self>) {
         let mut backoff = Duration::from_millis(200);
+        let mut woke = false;
         loop {
             match transport::connect() {
                 Ok((r, w)) => {
@@ -57,7 +56,16 @@ impl Link {
                     let _ = self.app.emit("zwall://connection", false);
                     crate::tray::update(&self.app, None);
                 }
-                Err(_) => backoff = (backoff * 2).min(Duration::from_secs(2)),
+                Err(_) => {
+                    if !woke {
+                        woke = true;
+                        if let Err(e) = crate::wake_engine_now(&self.app) {
+                            eprintln!("zwall: {e}");
+                            let _ = self.app.emit("zwall://error", e);
+                        }
+                    }
+                    backoff = (backoff * 2).min(Duration::from_secs(2));
+                }
             }
             thread::sleep(backoff);
         }

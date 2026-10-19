@@ -1,5 +1,3 @@
-
-
 use std::{
     io::BufReader,
     sync::{Arc, Mutex},
@@ -28,7 +26,6 @@ impl Hub {
     pub fn quitting(&self) -> bool {
         self.quit.load(std::sync::atomic::Ordering::Relaxed)
     }
-
 
     pub fn persist(self: &Arc<Self>, saved: crate::saved::Saved) {
         *self.saved.lock().unwrap() = Some(saved);
@@ -79,7 +76,6 @@ impl Hub {
         self.broadcast();
     }
 
-
     pub fn set_auto_pause(&self, reason: PauseReason) {
         {
             let mut s = self.state.lock().unwrap();
@@ -107,7 +103,6 @@ impl Hub {
         crate::saved::store(&state, saved);
     }
 
-
     pub fn set_auto(&self, monitor: &str, path: String) {
         {
             let mut s = self.state.lock().unwrap();
@@ -120,7 +115,6 @@ impl Hub {
         }
         self.broadcast();
     }
-
 
     pub fn apply_watch(&self, results: Vec<crate::watch::Scan>) {
         let mut changed = false;
@@ -184,7 +178,6 @@ impl Hub {
         self.broadcast();
     }
 
-
     pub fn set_blend_pairs(&self, pairs: Vec<zwall_ipc::BlendLink>) {
         let changed = {
             let mut s = self.state.lock().unwrap();
@@ -196,7 +189,6 @@ impl Hub {
             self.broadcast();
         }
     }
-
 
     pub fn set_blends(&self, blends: std::collections::BTreeMap<String, Vec<zwall_ipc::BlendEdge>>) {
         let changed = {
@@ -210,13 +202,11 @@ impl Hub {
         }
     }
 
-
     pub fn mark_run(&self, id: &str) {
         let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
         self.state.lock().unwrap().automation_runs.insert(id.to_string(), now);
         self.broadcast();
     }
-
 
     pub fn hotkey(&self, h: crate::backend::Hotkey) {
         use crate::backend::Hotkey;
@@ -236,7 +226,6 @@ impl Hub {
         }
     }
 
-
     pub fn set_gpu_percent(&self, p: Option<f32>) {
         {
             let mut s = self.state.lock().unwrap();
@@ -250,7 +239,6 @@ impl Hub {
         self.broadcast();
     }
 
-
     pub fn notice(&self, text: String) {
         log::info!("{text}");
         let ev = Event::Notice(text);
@@ -262,7 +250,6 @@ impl Hub {
         let ev = Event::Error(text);
         self.clients.lock().unwrap().retain_mut(|(_, w)| write_msg(w, &ev).is_ok());
     }
-
 
     pub fn request(&self, req: Request) {
         match self.handle(req) {
@@ -315,7 +302,6 @@ impl Hub {
         self.broadcast();
     }
 
-
     pub fn reject(&self, monitor: &str, why: String) {
         {
             let mut s = self.state.lock().unwrap();
@@ -336,7 +322,6 @@ impl Hub {
 
         self.clients.lock().unwrap().retain_mut(|(_, w)| write_msg(w, &ev).is_ok());
     }
-
 
     fn reply(&self, id: u64, ev: &Event) {
         if let Some((_, w)) = self.clients.lock().unwrap().iter_mut().find(|(i, _)| *i == id) {
@@ -437,7 +422,6 @@ impl Hub {
                 }
             }
             Request::SetTags { path, tags } => {
-
                 let mut clean: Vec<String> = Vec::new();
                 for t in tags.iter().map(|t| t.trim().to_lowercase()).filter(|t| !t.is_empty()) {
                     if !clean.contains(&t) {
@@ -447,7 +431,6 @@ impl Hub {
                 s.tags.insert(path, clean);
             }
             Request::RemoveFromLibrary { path } => {
-
                 let from = s.library.iter().find(|i| i.path == path).and_then(|i| i.from_watch.clone());
                 if let Some(w) = from.and_then(|id| s.watches.iter_mut().find(|w| w.id == id)) {
                     if !w.ignored.contains(&path) {
@@ -475,7 +458,6 @@ impl Hub {
             }
             Request::RescanWatches => crate::watch::kick(),
             Request::SetArrangement(map) => {
-
                 s.arrangement = map.into_iter().filter(|(n, p)| s.monitors.iter().any(|m| &m.name == n && (m.x, m.y) != (p[0], p[1]))).collect();
             }
             Request::SetWidgets(mut list) => {
@@ -576,7 +558,6 @@ impl Hub {
     }
 }
 
-
 fn break_spans(monitors: &mut [Monitor], names: &[String]) {
     let groups: Vec<String> = monitors.iter().filter(|m| names.contains(&m.name)).filter_map(|m| m.span.clone()).collect();
     for m in monitors.iter_mut().filter(|m| m.span.as_ref().is_some_and(|g| groups.contains(g))) {
@@ -601,7 +582,6 @@ pub fn serve(server: transport::Server, hub: Arc<Hub>) {
         };
         let hub = hub.clone();
         thread::spawn(move || {
-
             let first = Event::State(Box::new(hub.state.lock().unwrap().clone()));
             if write_msg(&mut w, &first).is_err() {
                 return;
@@ -627,7 +607,6 @@ pub fn serve(server: transport::Server, hub: Arc<Hub>) {
         });
     }
 }
-
 
 fn forget(s: &mut State, path: &str) {
     s.library.retain(|i| i.path != path);

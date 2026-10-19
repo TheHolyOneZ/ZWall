@@ -1,6 +1,4 @@
-
-
-use super::{Backend, Rect, SurfaceHandles};
+use super::{Backend, Pointer, Rect, SurfaceHandles};
 use std::process::Command;
 use zwall_ipc::Monitor;
 
@@ -12,7 +10,6 @@ impl KWin {
         Ok(Self)
     }
 }
-
 
 pub fn parse_outputs(json: &str) -> anyhow::Result<Vec<Monitor>> {
     let v: serde_json::Value = serde_json::from_str(json)?;
@@ -52,6 +49,10 @@ impl Backend for KWin {
     }
 
     fn destroy_surface(&mut self, _key: &str) {}
+
+    fn pointer(&self) -> Option<Pointer> {
+        crate::kwin_bridge::pointer().map(|(x, y)| Pointer { x, y })
+    }
 
     fn idle_ms(&self) -> u64 {
         Command::new("qdbus6")

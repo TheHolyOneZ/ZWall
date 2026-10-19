@@ -1,5 +1,3 @@
-
-
 use crate::server::Hub;
 use std::{
     collections::BTreeMap,
@@ -8,7 +6,6 @@ use std::{
 };
 use zwall_ipc::{BlendEdge, BlendLink, Monitor, State};
 use zwall_render::image::{self, imageops::FilterType, Rgba, RgbaImage};
-
 
 const N: usize = 256;
 
@@ -28,7 +25,6 @@ fn rect(s: &State, m: &Monitor) -> Rect {
     let (x, y) = s.desk(m);
     Rect { x: x as f32, y: y as f32, w: m.width as f32, h: m.height as f32 }
 }
-
 
 pub fn pairs(s: &State) -> Vec<BlendLink> {
     let mut out = Vec::new();
@@ -76,11 +72,9 @@ pub fn pairs(s: &State) -> Vec<BlendLink> {
     out
 }
 
-
 fn picture(s: &State, path: &str) -> Option<String> {
     s.thumbs.get(path).cloned().or_else(|| (!path.starts_with("preset://") && !zwall_render::is_video(path) && !zwall_render::is_web(path)).then(|| path.to_string()))
 }
-
 
 fn profile(img: &image::RgbImage, w: f32, h: f32, side: &str) -> Vec<[f32; 3]> {
     let (iw, ih) = (img.width() as f32, img.height() as f32);
@@ -138,7 +132,6 @@ fn sample(p: &[[f32; 3]], t: f32) -> [f32; 3] {
     [0, 1, 2].map(|c| p[i][c] * (1.0 - k) + p[j][c] * k)
 }
 
-
 fn band(own: &[[f32; 3]], other: &[[f32; 3]], span: [f32; 2], other_span: [f32; 2], strength: f32, along_x: bool, seam_last: bool) -> RgbaImage {
     let (w, h) = if along_x { (N as u32, DEPTH) } else { (DEPTH, N as u32) };
     let len = (span[1] - span[0]).max(1e-3);
@@ -166,12 +159,10 @@ fn band(own: &[[f32; 3]], other: &[[f32; 3]], span: [f32; 2], other_span: [f32; 
     })
 }
 
-
 fn key(s: &State) -> String {
     let screens: Vec<_> = s.monitors.iter().map(|m| (&m.name, &m.wallpaper, &m.span, s.desk(m), m.width, m.height, m.wallpaper.as_ref().and_then(|p| s.thumbs.get(p)))).collect();
     format!("{screens:?}{:?}{}{}{}", s.blend_links, s.settings.blend_edges, s.settings.blend_strength, s.settings.blend_width)
 }
-
 
 pub fn tick(hub: &Arc<Hub>) {
     let s = hub.snapshot();
@@ -257,7 +248,6 @@ mod tests {
 
     #[test]
     fn finds_side_by_side_and_their_overlap() {
-
         let s = State { monitors: vec![mon("A", 0, 0, 2560, 1440), mon("B", 2560, 180, 1920, 1080)], ..Default::default() };
         let p = pairs(&s);
         assert_eq!(p.len(), 1);

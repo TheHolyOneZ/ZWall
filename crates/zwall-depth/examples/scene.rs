@@ -1,5 +1,3 @@
-
-
 fn main() -> anyhow::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let cache = std::path::PathBuf::from(std::env::var("HOME")?).join(".cache/zwall/models");

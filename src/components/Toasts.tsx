@@ -1,4 +1,3 @@
-
 import { AnimatePresence, motion } from "motion/react";
 import { Check, TriangleAlert } from "lucide-react";
 import { useStore } from "../lib/store";

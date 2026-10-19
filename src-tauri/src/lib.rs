@@ -1,5 +1,3 @@
-
-
 mod link;
 mod tray;
 
@@ -31,7 +29,6 @@ fn engine_path() -> std::path::PathBuf {
     std::env::current_exe().ok().and_then(|e| e.parent().map(|d| d.join(name))).filter(|p| p.exists()).unwrap_or_else(|| name.into())
 }
 
-
 fn quiet(program: impl AsRef<std::ffi::OsStr>) -> std::process::Command {
     #[allow(unused_mut)]
     let mut c = std::process::Command::new(program);
@@ -42,7 +39,6 @@ fn quiet(program: impl AsRef<std::ffi::OsStr>) -> std::process::Command {
     }
     c
 }
-
 
 #[cfg(not(windows))]
 fn autostart_file() -> Option<std::path::PathBuf> {
@@ -73,7 +69,6 @@ fn set_autostart(on: bool) -> Result<bool, String> {
     Ok(autostart())
 }
 
-
 #[cfg(windows)]
 const RUN_KEY: &str = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run";
 
@@ -99,7 +94,6 @@ fn set_autostart(on: bool) -> Result<bool, String> {
     Ok(autostart())
 }
 
-
 #[cfg(not(windows))]
 #[tauri::command]
 fn reveal(path: String) -> Result<(), String> {
@@ -115,7 +109,6 @@ fn reveal(path: String) -> Result<(), String> {
     std::process::Command::new("xdg-open").arg(dir).spawn().map(drop).map_err(|e| e.to_string())
 }
 
-
 #[cfg(windows)]
 #[tauri::command]
 fn reveal(path: String) -> Result<(), String> {
@@ -124,7 +117,6 @@ fn reveal(path: String) -> Result<(), String> {
     std::process::Command::new("explorer").raw_arg(format!("/select,\"{path}\"")).spawn().map(drop).map_err(|e| e.to_string())
 }
 
-
 #[tauri::command]
 fn open_link(url: String) -> Result<(), String> {
     if !(url.starts_with("https://") || url.starts_with("http://")) {
@@ -132,7 +124,6 @@ fn open_link(url: String) -> Result<(), String> {
     }
     #[cfg(windows)]
     let mut c = {
-
         let mut c = quiet("cmd");
         c.args(["/c", "start", ""]).arg(&url);
         c
@@ -147,18 +138,103 @@ fn open_link(url: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn wake_engine() -> Result<(), String> {
-    wake_engine_now()
+fn wake_engine(app: AppHandle) -> Result<(), String> {
+    wake_engine_now(&app)
 }
 
-
-pub fn wake_engine_now() -> Result<(), String> {
-    quiet(engine_path()).spawn().map(drop).map_err(|e| format!("could not start zwall-engine: {e}"))
+fn engine_log() -> Option<std::path::PathBuf> {
+    #[cfg(windows)]
+    let dir = std::env::var_os("LOCALAPPDATA").map(std::path::PathBuf::from)?.join("ZWall");
+    #[cfg(not(windows))]
+    let dir = std::env::var_os("XDG_DATA_HOME").map(std::path::PathBuf::from).or_else(|| std::env::var_os("HOME").map(|h| std::path::PathBuf::from(h).join(".local/share")))?.join("zwall");
+    Some(dir.join("engine.log"))
 }
 
+fn last_log_line(log: &Path, since: std::time::SystemTime) -> Option<String> {
+    if std::fs::metadata(log).and_then(|m| m.modified()).ok()? < since {
+        return None;
+    }
+    let text = std::fs::read_to_string(log).ok()?;
+    text.lines().rev().find(|l| !l.trim().is_empty()).map(|l| l.trim().to_string())
+}
+
+fn describe_exit(status: std::process::ExitStatus) -> Option<String> {
+    #[cfg(windows)]
+    {
+        let reason = match status.code()? as u32 {
+            0xC000_0135 => "a DLL it needs is missing. Reinstall ZWall, or install the Microsoft Visual C++ Redistributable (x64)",
+            0xC000_0139 | 0xC000_007A => "a DLL it needs is too old. Reinstall ZWall, or update the Microsoft Visual C++ Redistributable (x64)",
+            0xC000_007B => "one of its DLLs is damaged or for the wrong architecture. Reinstall ZWall",
+            0xC000_0142 => "Windows couldn't initialise it (DLL init failed). Restart Windows and try again",
+            0xC000_0005 | 0xC000_0409 | 0xC000_001D => "it crashed while starting",
+            _ => return None,
+        };
+        Some(reason.into())
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::ExitStatusExt;
+        status.signal().map(|s| format!("it crashed while starting (signal {s})"))
+    }
+}
+
+#[cfg(unix)]
+fn ensure_executable(path: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+    if let Ok(meta) = std::fs::metadata(path) {
+        let mode = meta.permissions().mode();
+        if mode & 0o111 == 0 {
+            let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(mode | 0o755));
+        }
+    }
+}
+
+pub fn wake_engine_now(app: &AppHandle) -> Result<(), String> {
+    let path = engine_path();
+    #[cfg(unix)]
+    ensure_executable(&path);
+    #[allow(unused_mut)]
+    let mut cmd = quiet(&path);
+    let log = engine_log();
+    let since = std::time::SystemTime::now() - std::time::Duration::from_secs(1);
+    #[cfg(not(windows))]
+    if let Some(f) = log.as_ref().and_then(|l| {
+        let _ = std::fs::create_dir_all(l.parent()?);
+        std::fs::File::create(l).ok()
+    }) {
+        cmd.stderr(f);
+    }
+    let mut child = cmd.spawn().map_err(|e| match e.kind() {
+        std::io::ErrorKind::PermissionDenied => format!("could not start {}: it isn't executable. Reinstall ZWall or run: sudo chmod +x {}", path.display(), path.display()),
+        std::io::ErrorKind::NotFound => format!("could not start zwall-engine: {} wasn't found. Reinstall ZWall.", path.display()),
+        _ => format!("could not start zwall-engine: {e}"),
+    })?;
+
+    let app = app.clone();
+    std::thread::spawn(move || {
+        let started = std::time::Instant::now();
+        while started.elapsed() < std::time::Duration::from_secs(4) {
+            match child.try_wait() {
+                Ok(Some(status)) => {
+                    use tauri::Emitter;
+                    let line = log.as_deref().and_then(|l| last_log_line(l, since));
+                    let at = match (&line, &log) {
+                        (Some(_), Some(l)) => format!(" (log: {})", l.display()),
+                        _ => String::new(),
+                    };
+                    let why = describe_exit(status).or(line).unwrap_or_else(|| format!("exit status {status}"));
+                    let _ = app.emit("zwall://error", format!("The wallpaper engine stopped right after starting: {why}{at}"));
+                    return;
+                }
+                Ok(None) => std::thread::sleep(std::time::Duration::from_millis(200)),
+                Err(_) => return,
+            }
+        }
+    });
+    Ok(())
+}
 
 static WINDOW_GLASS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-
 
 #[tauri::command]
 fn quit_app(app: AppHandle) {
@@ -173,7 +249,6 @@ fn window_glass() -> bool {
 fn enable_window_glass(window: &tauri::WebviewWindow) {
     #[cfg(windows)]
     {
-
         use windows::Win32::{Foundation::HWND, Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND}};
         if let Ok(hwnd) = window.hwnd() {
             let pref = DWMWCP_ROUND;
@@ -195,7 +270,6 @@ fn enable_window_glass(window: &tauri::WebviewWindow) {
         if kde_blur(xid, window).is_ok() {
             WINDOW_GLASS.store(true, std::sync::atomic::Ordering::Relaxed);
 
-
             let w = window.clone();
             window.on_window_event(move |e| {
                 if matches!(e, tauri::WindowEvent::Resized(_) | tauri::WindowEvent::ScaleFactorChanged { .. }) {
@@ -205,7 +279,6 @@ fn enable_window_glass(window: &tauri::WebviewWindow) {
         }
     }
 }
-
 
 #[cfg(target_os = "linux")]
 fn kde_blur(window: u32, win: &tauri::WebviewWindow) -> Result<(), Box<dyn std::error::Error>> {
@@ -229,7 +302,6 @@ fn kde_blur(window: u32, win: &tauri::WebviewWindow) -> Result<(), Box<dyn std::
     Ok(())
 }
 
-
 #[derive(serde::Serialize)]
 #[serde(rename_all = "lowercase")]
 enum Intake {
@@ -242,7 +314,6 @@ enum Intake {
     Folder,
     Unsupported,
 }
-
 
 #[tauri::command]
 fn classify(path: String) -> Intake {
@@ -263,7 +334,6 @@ fn classify(path: String) -> Intake {
     }
 }
 
-
 #[tauri::command]
 fn wallpaper_engine_folder() -> Option<String> {
     let env = |k: &str| std::env::var_os(k).map(std::path::PathBuf::from);
@@ -277,8 +347,6 @@ fn wallpaper_engine_folder() -> Option<String> {
     let mut libraries: Vec<std::path::PathBuf> = steam_roots.to_vec();
     for root in &steam_roots {
         if let Ok(vdf) = std::fs::read_to_string(root.join("steamapps/libraryfolders.vdf")) {
-
-
             for line in vdf.lines().filter(|l| l.trim_start().starts_with("\"path\"")) {
                 if let Some(p) = line.split('"').nth(3) {
                     libraries.push(p.replace("\\\\", "/").into());
@@ -289,12 +357,10 @@ fn wallpaper_engine_folder() -> Option<String> {
     libraries.into_iter().map(|l| l.join("steamapps/workshop/content/431960")).find(|p| p.is_dir()).map(|p| p.to_string_lossy().into_owned())
 }
 
-
 #[tauri::command]
 fn scan_folder(dir: String, recursive: bool) -> Result<Vec<zwall_format::scan::Found>, String> {
     zwall_format::scan::scan(Path::new(&dir), recursive, 5000)
 }
-
 
 #[cfg(not(windows))]
 fn install_icon() {
@@ -316,7 +382,6 @@ fn install_icon() {
         }
     }
     if changed {
-
         let _ = std::fs::File::open(&theme).and_then(|f| f.set_modified(std::time::SystemTime::now()));
     }
 }
@@ -346,7 +411,6 @@ pub fn run() {
                 enable_window_glass(&w);
             }
 
-
             if let Some(w) = app.get_webview_window(MAIN) {
                 let handle = app.handle().clone();
                 let born = std::time::Instant::now();
@@ -366,7 +430,6 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
-
 
     #[test]
     fn scans_a_real_workshop_folder() {

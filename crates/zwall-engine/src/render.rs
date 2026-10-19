@@ -1,5 +1,3 @@
-
-
 use crate::{
     backend::{Backend, Rect},
     pause::{self, Signals},
@@ -18,7 +16,6 @@ use std::{
 use zwall_ipc::{Motion, PauseReason, State, Tint};
 use zwall_render::{FrameInputs, Gpu, Scene, Source};
 
-
 const RIPPLE_SECS: f32 = 2.5;
 
 enum Player {
@@ -35,7 +32,6 @@ struct Live {
     cursor: [f32; 2],
     ripple: Option<([f32; 2], Instant)>,
 }
-
 
 fn desired(s: &State) -> BTreeMap<String, (String, Rect)> {
     let mut out = BTreeMap::new();
@@ -58,7 +54,6 @@ fn desired(s: &State) -> BTreeMap<String, (String, Rect)> {
     out
 }
 
-
 pub fn render_thumbnails(gpu: &mut Gpu) -> BTreeMap<String, String> {
     use std::hash::{Hash, Hasher};
     let mut out = BTreeMap::new();
@@ -72,7 +67,6 @@ pub fn render_thumbnails(gpu: &mut Gpu) -> BTreeMap<String, String> {
         (src, zwall_render::COMMON_VERSION).hash(&mut h);
         let file = dir.join(format!("{name}-{:08x}.png", h.finish() as u32));
         if !file.exists() {
-
             match zwall_render::snapshot(gpu, &Source::Shader(src), 960, 540, 7.5).and_then(|img| Ok(img.save(&file)?)) {
                 Ok(()) => log::info!("thumbnail: {}", file.display()),
                 Err(e) => {
@@ -133,7 +127,6 @@ pub fn run(hub: Arc<Hub>, mut backend: Box<dyn Backend>, stop: Arc<AtomicBool>) 
             continue;
         }
 
-
         let stale: Vec<String> = live
             .iter()
             .filter(|(k, l)| want.get(*k).is_none_or(|(p, r)| *p != l.path || *r != l.rect || s.depths.get(p) != l.depth.as_ref() || s.scenes.get(p).map(|x| &x.map) != l.scene.as_ref()))
@@ -183,7 +176,6 @@ pub fn run(hub: Arc<Hub>, mut backend: Box<dyn Backend>, stop: Arc<AtomicBool>) 
         let (fps_cap, quality) = crate::conditions::effective(&s.settings, cond.on_battery);
         let paused = s.paused != PauseReason::None;
 
-
         let mut heard: Vec<&str> = Vec::new();
         let mut keys: Vec<&String> = live.keys().collect();
         keys.sort();
@@ -209,7 +201,6 @@ pub fn run(hub: Arc<Hub>, mut backend: Box<dyn Backend>, stop: Arc<AtomicBool>) 
 
         let gpu_scenes = live.values().any(|l| matches!(l.player, Player::Gpu(_)));
         if paused || !gpu_scenes {
-
             let wl_video = !paused && backend.name() != "x11" && live.values().any(|l| matches!(l.player, Player::Video(_)));
             let tick = if wl_video { 1000 / fps_cap.clamp(15, 144) as u64 } else if paused { 100 } else { 50 };
             thread::sleep(Duration::from_millis(tick));
@@ -281,7 +272,6 @@ pub fn run(hub: Arc<Hub>, mut backend: Box<dyn Backend>, stop: Arc<AtomicBool>) 
             thread::sleep(rest);
         }
     }
-
 
     let keys: Vec<String> = live.keys().cloned().collect();
     drop(live);

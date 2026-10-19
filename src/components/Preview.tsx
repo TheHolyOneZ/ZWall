@@ -1,11 +1,8 @@
-
-
 import type { MotionValue } from "motion/react";
 import { motion, motionValue, useTransform } from "motion/react";
 import { useState, type ReactNode } from "react";
 import { useStore } from "../lib/store";
 import type { Look } from "../lib/types";
-
 
 export function LookLayer({ path, children }: { path: string; children: ReactNode }) {
   const params = useStore((s) => s.engine?.params?.[path]);
@@ -58,7 +55,6 @@ function Picture({ src, px, py, paused, onLoad }: { src: string; px?: MotionValu
 }
 
 function Layer({ depth, index, px, py }: { depth: number; index: number; px?: MotionValue<number>; py?: MotionValue<number> }) {
-
   const x = useTransform(px ?? ZERO, (v) => v * 14 * depth);
   const y = useTransform(py ?? ZERO, (v) => v * 10 * depth);
   return <motion.div className={`layer l${index}`} style={{ x, y }} />;

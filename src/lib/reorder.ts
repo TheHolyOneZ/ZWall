@@ -1,5 +1,3 @@
-
-
 import { useRef, useState } from "react";
 
 interface Drag {
@@ -48,7 +46,6 @@ export function useReorder(keys: string[], opts: ReorderOptions) {
       const b = opts.bounds?.();
       const out = outable && !!b && (ev.clientX < b.left - 24 || ev.clientX > b.right + 24);
 
-
       const to = rects.filter((r, i) => i !== from && r.top + r.height / 2 < ev.clientY).length;
       state = { key, from, to, dx, dy, x: ev.clientX, y: ev.clientY, shift, out };
       setDrag(state);
@@ -72,7 +69,6 @@ export function useReorder(keys: string[], opts: ReorderOptions) {
     window.addEventListener("pointerup", up);
     window.addEventListener("pointercancel", up);
   };
-
 
   const item = (key: string) => {
     const i = keys.indexOf(key);
@@ -99,7 +95,6 @@ export function useReorder(keys: string[], opts: ReorderOptions) {
       },
     };
   };
-
 
   const grip = (key: string) => ({
     onPointerDown: (e: React.PointerEvent) => begin(key, e),

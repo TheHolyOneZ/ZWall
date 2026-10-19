@@ -1,5 +1,3 @@
-
-
 import { Blend } from "lucide-react";
 import { useRef, useState } from "react";
 import { send } from "../lib/actions";
@@ -18,7 +16,6 @@ interface Placed {
 type Handle = "reachA" | "reachB" | "a0" | "a1" | "b0" | "b1";
 
 export function Seams({ placed, pairs, links, blends, zoom = 1 }: { placed: Placed[]; pairs: BlendLink[]; links: Record<string, BlendLink>; blends: Record<string, BlendEdge[]>; zoom?: number }) {
-
   const z = 1 / zoom;
   const svg = useRef<SVGSVGElement>(null);
   const [edit, setEdit] = useState<BlendLink | null>(null);
@@ -187,7 +184,6 @@ export function Seams({ placed, pairs, links, blends, zoom = 1 }: { placed: Plac
     </>
   );
 }
-
 
 interface Side {
   edge: number;

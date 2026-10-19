@@ -1,5 +1,3 @@
-
-
 use super::{Backend, Hotkey, Input, Pointer, Rect, SurfaceHandles};
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle, XcbDisplayHandle, XcbWindowHandle};
 use std::{collections::HashMap, num::NonZeroU32, ptr::NonNull};
@@ -70,7 +68,6 @@ impl X11 {
         Ok(Self { conn, screen, root, atoms, windows: HashMap::new(), hotkeys: Vec::new() })
     }
 
-
     fn window_rects(&self) -> Option<Vec<Rect>> {
         let c = &self.conn;
         let a = &self.atoms;
@@ -116,11 +113,9 @@ impl X11 {
             .unwrap_or(false)
     }
 
-
     fn is_desktop(&self, win: Window) -> bool {
         win == 0 || self.contains_desktop(win, 3)
     }
-
 
     fn contains_desktop(&self, win: Window, depth: u32) -> bool {
         if self.windows.values().any(|w| *w == win) || self.typed_desktop(win) {
@@ -285,7 +280,6 @@ impl Backend for X11 {
     }
 
     fn set_hotkeys(&mut self, on: bool) -> Vec<String> {
-
         let locks = [0, u16::from(ModMask::M2), u16::from(ModMask::LOCK), u16::from(ModMask::M2) | u16::from(ModMask::LOCK)];
         for (code, mods, _) in self.hotkeys.drain(..) {
             for l in locks {
@@ -366,10 +360,7 @@ impl Backend for X11 {
 }
 
 impl X11 {
-
-
     fn restack(&self) {
-
         let Some(stack) = self
             .conn
             .get_property(false, self.root, self.atoms._NET_CLIENT_LIST_STACKING, AtomEnum::WINDOW, 0, 4096)
@@ -390,7 +381,6 @@ impl X11 {
             }
         }
     }
-
 }
 
 impl Drop for X11 {

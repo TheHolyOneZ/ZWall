@@ -1,5 +1,3 @@
-
-
 use std::path::PathBuf;
 
 #[cfg(windows)]
@@ -7,7 +5,6 @@ use std::path::PathBuf;
 mod win;
 #[cfg(windows)]
 pub use win::{accent, cache_dir, config_dir, data_dir, idle_inhibited, on_battery, others_playing, screen_locked};
-
 
 pub fn command(program: impl AsRef<std::ffi::OsStr>) -> std::process::Command {
     #[allow(unused_mut)]
@@ -21,12 +18,10 @@ pub fn command(program: impl AsRef<std::ffi::OsStr>) -> std::process::Command {
     c
 }
 
-
 pub fn on_path(name: &str) -> Option<PathBuf> {
     let path = std::env::var_os("PATH")?;
     std::env::split_paths(&path).map(|d| d.join(name)).find(|p| p.is_file())
 }
-
 
 #[cfg(not(windows))]
 pub fn accent() -> Option<String> {
@@ -65,7 +60,6 @@ pub fn parse_hex(hex: &str) -> Option<[f32; 3]> {
     Some([((n >> 16) & 255) as f32 / 255.0, ((n >> 8) & 255) as f32 / 255.0, (n & 255) as f32 / 255.0])
 }
 
-
 #[cfg(not(windows))]
 pub fn data_dir() -> PathBuf {
     std::env::var_os("XDG_DATA_HOME")
@@ -80,7 +74,6 @@ pub fn cache_dir() -> Option<PathBuf> {
     let base = std::env::var_os("XDG_CACHE_HOME").map(PathBuf::from).or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".cache")))?;
     Some(base.join("zwall"))
 }
-
 
 #[cfg(not(windows))]
 pub fn config_dir() -> Option<PathBuf> {
@@ -100,7 +93,6 @@ mod tests {
     }
 }
 
-
 #[cfg(not(windows))]
 pub fn on_battery() -> bool {
     let Ok(dir) = std::fs::read_dir("/sys/class/power_supply") else { return false };
@@ -117,7 +109,6 @@ pub fn on_battery() -> bool {
     saw_mains
 }
 
-
 pub fn any_running(names: &[String]) -> bool {
     if names.is_empty() {
         return false;
@@ -125,7 +116,6 @@ pub fn any_running(names: &[String]) -> bool {
     let wanted: Vec<String> = names.iter().map(|n| n.trim().to_lowercase()).filter(|n| !n.is_empty()).collect();
     running_names().iter().any(|p| wanted.iter().any(|w| p.starts_with(w.as_str())))
 }
-
 
 #[cfg(windows)]
 pub fn running_names() -> Vec<String> {
@@ -143,7 +133,6 @@ pub fn running_names() -> Vec<String> {
         .collect()
 }
 
-
 #[cfg(not(windows))]
 pub fn idle_inhibited() -> bool {
     std::process::Command::new("qdbus6")
@@ -151,7 +140,6 @@ pub fn idle_inhibited() -> bool {
         .output()
         .is_ok_and(|o| String::from_utf8_lossy(&o.stdout).trim() == "true")
 }
-
 
 #[cfg_attr(windows, allow(dead_code))]
 fn cached(slot: &std::sync::Mutex<Option<(std::time::Instant, bool)>>, ask: impl FnOnce() -> bool) -> bool {
@@ -166,7 +154,6 @@ fn cached(slot: &std::sync::Mutex<Option<(std::time::Instant, bool)>>, ask: impl
     v
 }
 
-
 #[cfg(not(windows))]
 pub fn screen_locked() -> bool {
     static C: std::sync::Mutex<Option<(std::time::Instant, bool)>> = std::sync::Mutex::new(None);
@@ -177,7 +164,6 @@ pub fn screen_locked() -> bool {
             .is_ok_and(|o| String::from_utf8_lossy(&o.stdout).trim() == "true")
     })
 }
-
 
 #[cfg(not(windows))]
 pub fn others_playing() -> bool {
@@ -192,7 +178,6 @@ pub fn others_playing() -> bool {
         })
     })
 }
-
 
 pub fn muted(settings: &zwall_ipc::Settings) -> bool {
     settings.mute || (settings.duck_audio && others_playing())

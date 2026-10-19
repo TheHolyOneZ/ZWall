@@ -1,4 +1,3 @@
-
 import { bridge } from "./ipc";
 import { useStore } from "./store";
 import type { Request, Wallpaper } from "./types";
@@ -11,7 +10,6 @@ export async function send(req: Request) {
     useStore.getState().toast("error", String(e));
   }
 }
-
 
 export function place(w: Wallpaper, target: string) {
   if (w.developing) return useStore.getState().toast("error", `${w.name} is still developing`);
@@ -28,12 +26,10 @@ export function describeTarget(target: string | null) {
   return `Play on ${target}`;
 }
 
-
 export async function importFolder() {
   const dir = await (await bridge).pickFolder();
   if (dir) useStore.getState().openImport(dir);
 }
-
 
 export async function importWallpaperEngine() {
   const dir = await (await bridge).wallpaperEngineFolder();

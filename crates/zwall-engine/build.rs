@@ -1,5 +1,3 @@
-
-
 use std::{fs, path::Path};
 
 fn walk(dir: &Path, root: &Path, out: &mut Vec<(String, String)>) {

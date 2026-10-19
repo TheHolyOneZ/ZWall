@@ -1,5 +1,3 @@
-
-
 #[cfg(target_os = "linux")]
 #[path = "video_linux.rs"]
 mod imp;

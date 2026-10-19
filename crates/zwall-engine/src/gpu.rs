@@ -1,5 +1,3 @@
-
-
 use std::{collections::HashMap, time::Instant};
 
 pub struct Meter {
@@ -13,7 +11,6 @@ fn pids_named(name: &str) -> Vec<u32> {
         .filter(|pid| std::fs::read_to_string(format!("/proc/{pid}/comm")).is_ok_and(|c| c.trim() == name))
         .collect()
 }
-
 
 fn busy_ns(pids: &[u32]) -> u64 {
     let mut clients: HashMap<String, u64> = HashMap::new();
@@ -45,7 +42,6 @@ impl Meter {
     pub fn new() -> Self {
         Self { last: None }
     }
-
 
     pub fn sample(&mut self, include_plasma: bool) -> Option<f32> {
         let mut pids = vec![std::process::id()];

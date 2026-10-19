@@ -1,5 +1,3 @@
-
-
 use crate::{
     backend::Backend,
     feed::Feed,
@@ -45,7 +43,6 @@ fn file_url(path: &str) -> String {
     url
 }
 
-
 fn to_desk(s: &State, x: i32, y: i32) -> (i32, i32) {
     match s.monitors.iter().find(|m| x >= m.x && y >= m.y && x < m.x + m.width as i32 && y < m.y + m.height as i32) {
         Some(m) => {
@@ -55,7 +52,6 @@ fn to_desk(s: &State, x: i32, y: i32) -> (i32, i32) {
         None => (x, y),
     }
 }
-
 
 pub fn state_json(s: &State, on_battery: bool) -> String {
     let (fps, quality) = crate::conditions::effective(&s.settings, on_battery);
@@ -134,14 +130,12 @@ pub fn state_json(s: &State, on_battery: bool) -> String {
 }
 
 pub fn run(hub: Arc<Hub>, mut backend: Box<dyn Backend>, stop: Arc<AtomicBool>, feed: Arc<Feed>) {
-
     let mut gpu = zwall_render::Gpu::new();
     hub.set_thumbnails(crate::render::render_thumbnails(&mut gpu));
     if let Some(name) = gpu.adapter_name() {
         hub.set_gpu(name);
     }
     drop(gpu);
-
 
     let mut taken: BTreeSet<String> = hub.plasma_originals().into_keys().collect();
     let mut last_signals = Instant::now() - Duration::from_secs(1);
@@ -255,7 +249,6 @@ pub fn run(hub: Arc<Hub>, mut backend: Box<dyn Backend>, stop: Arc<AtomicBool>, 
             thread::sleep(Duration::from_millis(50));
         }
     }
-
 
     if hub.quitting() {
         let s = hub.snapshot();

@@ -1,5 +1,3 @@
-
-
 use serde::{Deserialize, Serialize};
 use std::{
     io::{self, BufRead, Write},
@@ -10,9 +8,7 @@ pub mod transport;
 
 pub const PROTOCOL: u32 = 1;
 
-
 pub fn socket_path() -> PathBuf {
-
     if let Some(p) = std::env::var_os("ZWALL_SOCKET") {
         return PathBuf::from(p);
     }
@@ -22,10 +18,8 @@ pub fn socket_path() -> PathBuf {
     }
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Monitor {
-
     pub name: String,
     pub x: i32,
     pub y: i32,
@@ -56,15 +50,12 @@ pub enum PauseReason {
     Locked,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct Settings {
-
     pub fps_cap: u32,
 
     pub quality: f32,
-
 
     pub web_fps: u32,
     pub pause_fullscreen: bool,
@@ -133,7 +124,6 @@ impl Default for Settings {
     }
 }
 
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Motion {
@@ -153,7 +143,6 @@ pub enum Tint {
     Accent,
     Mono,
 }
-
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
@@ -178,11 +167,9 @@ impl Overlay {
     }
 }
 
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
 pub struct Params {
-
     pub speed: f32,
 
     pub intensity: f32,
@@ -200,10 +187,8 @@ pub struct Params {
     pub life: f32,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct SceneInfo {
-
     pub map: String,
 
     pub found: Vec<String>,
@@ -211,15 +196,12 @@ pub struct SceneInfo {
 
 impl Default for Params {
     fn default() -> Self {
-
         Self { speed: 1.0, intensity: 1.0, depth: 0.0, motion: Motion::Mouse, tint: Tint::Original, volume: 1.0, overlay: Overlay::None, overlay_amount: 1.0, life: 0.0 }
     }
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Rotation {
-
     pub every_minutes: u32,
 
     pub source: String,
@@ -236,11 +218,9 @@ fn yes() -> bool {
     true
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Trigger {
-
     At { time: String },
 
     Every {
@@ -260,7 +240,6 @@ pub enum Trigger {
     Startup,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Source {
@@ -268,7 +247,6 @@ pub enum Source {
     Favourites,
 
     Collection { id: String },
-
 
     Tag {
         tag: String,
@@ -284,7 +262,6 @@ pub enum Source {
         label: String,
     },
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -305,7 +282,6 @@ pub enum Action {
 
     Volume { level: u32 },
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Automation {
@@ -331,7 +307,6 @@ pub struct Automation {
     pub undo_after: bool,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct UserCollection {
     pub id: String,
@@ -339,19 +314,15 @@ pub struct UserCollection {
     pub paths: Vec<String>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Slot {
-
     pub at: String,
     pub path: String,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(default)]
 pub struct Meta {
-
     #[serde(skip_serializing_if = "String::is_empty")]
     pub title: String,
     #[serde(skip_serializing_if = "String::is_empty")]
@@ -368,7 +339,6 @@ pub struct Meta {
 }
 
 impl State {
-
     pub fn desk(&self, m: &Monitor) -> (i32, i32) {
         self.arrangement.get(&m.name).map_or((m.x, m.y), |p| (p[0], p[1]))
     }
@@ -380,16 +350,13 @@ impl Meta {
     }
 }
 
-
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Default)]
 pub struct Facts {
-
     pub width: u32,
     pub height: u32,
 
     pub bytes: u64,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(default)]
@@ -448,7 +415,6 @@ impl Default for Widget {
     }
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct BlendLink {
     pub a: String,
@@ -469,23 +435,19 @@ pub struct BlendLink {
 }
 
 impl BlendLink {
-
     pub fn key(a: &str, b: &str) -> String {
         format!("{a}|{b}")
     }
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct BlendEdge {
-
     pub side: String,
 
     pub image: String,
 
     pub size: f32,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct LibraryItem {
@@ -500,7 +462,6 @@ pub struct LibraryItem {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub from_watch: Option<String>,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Watch {
@@ -528,10 +489,8 @@ pub struct Watch {
     pub ignored: Vec<String>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct WatchStatus {
-
     pub found: u32,
 
     pub scanned: u64,
@@ -585,7 +544,6 @@ pub struct State {
     #[serde(default)]
     pub collections: Vec<UserCollection>,
 
-
     #[serde(default)]
     pub arrangement: std::collections::BTreeMap<String, [i32; 2]>,
 
@@ -595,10 +553,8 @@ pub struct State {
     #[serde(default)]
     pub fonts: Vec<String>,
 
-
     #[serde(default)]
     pub blend_links: std::collections::BTreeMap<String, BlendLink>,
-
 
     #[serde(default)]
     pub blend_pairs: Vec<BlendLink>,
@@ -723,7 +679,6 @@ pub fn write_msg<W: Write, T: Serialize>(w: &mut W, msg: &T) -> io::Result<()> {
     w.flush()
 }
 
-
 pub fn read_msg<R: BufRead, T: for<'de> Deserialize<'de>>(r: &mut R, buf: &mut String) -> io::Result<Option<T>> {
     buf.clear();
     if r.read_line(buf)? == 0 {
@@ -750,20 +705,17 @@ mod tests {
     }
 }
 
-
 pub const SCREEN_KEY: &str = "#screen=";
 
 pub fn screen_key(path: &str, monitor: &str) -> String {
     format!("{path}{SCREEN_KEY}{monitor}")
 }
 
-
 pub fn key_path(key: &str) -> &str {
     key.split_once(SCREEN_KEY).map_or(key, |(p, _)| p)
 }
 
 impl State {
-
     pub fn params_for(&self, path: &str, monitor: &str) -> Params {
         self.params.get(&screen_key(path, monitor)).or_else(|| self.params.get(path)).copied().unwrap_or_default()
     }

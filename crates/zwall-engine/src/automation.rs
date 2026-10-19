@@ -1,5 +1,3 @@
-
-
 use crate::server::Hub;
 use chrono::{Datelike, Local, NaiveDate, Timelike};
 use std::{
@@ -9,10 +7,8 @@ use std::{
 };
 use zwall_ipc::{Action, Automation, PauseReason, Request, Source, State, Trigger};
 
-
 #[derive(Default)]
 struct Undo {
-
     screens: Vec<(String, Option<String>, String)>,
     paused: Option<PauseReason>,
     mute: Option<bool>,
@@ -35,7 +31,6 @@ struct Run {
 
 static RUN: Mutex<Option<Run>> = Mutex::new(None);
 
-
 pub fn minutes(at: &str) -> Option<u32> {
     let (h, m) = at.split_once(':')?;
     let (h, m): (u32, u32) = (h.trim().parse().ok()?, m.trim().parse().ok()?);
@@ -45,7 +40,6 @@ pub fn minutes(at: &str) -> Option<u32> {
 pub fn today() -> String {
     Local::now().date_naive().to_string()
 }
-
 
 fn in_window(from: &str, to: &str, now: u32) -> bool {
     match (minutes(from), minutes(to)) {
@@ -59,7 +53,6 @@ fn runs_today(a: &Automation, weekday: u8) -> bool {
     a.enabled && (a.days.is_empty() || a.days.contains(&weekday))
 }
 
-
 fn changes_wallpaper(a: &Action) -> bool {
     matches!(a, Action::Play { .. } | Action::Random { .. } | Action::Next { .. })
 }
@@ -69,7 +62,6 @@ fn everything(s: &State) -> Vec<String> {
     all.extend(zwall_render::PRESETS.iter().map(|(n, _)| format!("preset://{n}")));
     all
 }
-
 
 pub fn pool(s: &State, src: &Source) -> Vec<String> {
     let exists = |p: &String| p.starts_with("preset://") || s.library.iter().any(|i| &i.path == p);
@@ -109,7 +101,6 @@ fn random_index(n: usize) -> usize {
     ((z ^ (z >> 31)) % n as u64) as usize
 }
 
-
 pub fn pick(pool: &[String], current: Option<&str>, shuffle: bool) -> Option<String> {
     if pool.is_empty() {
         return None;
@@ -125,7 +116,6 @@ pub fn pick(pool: &[String], current: Option<&str>, shuffle: bool) -> Option<Str
     Some(pool[i.map_or(0, |i| (i + 1) % pool.len())].clone())
 }
 
-
 fn targets(s: &State, a: &Automation) -> Vec<String> {
     let day = today();
     s.monitors
@@ -135,7 +125,6 @@ fn targets(s: &State, a: &Automation) -> Vec<String> {
         .filter(|n| !(a.respect_manual && changes_wallpaper(&a.action) && s.manual.get(n) == Some(&day)))
         .collect()
 }
-
 
 fn perform(hub: &Hub, a: &Automation) -> Option<Undo> {
     let s = hub.snapshot();
@@ -154,7 +143,6 @@ fn perform(hub: &Hub, a: &Automation) -> Option<Undo> {
             };
             let mut done: Vec<String> = Vec::new();
             for n in &screens {
-
                 let span = s.monitors.iter().find(|m| &m.name == n).and_then(|m| m.span.clone());
                 if span.as_ref().is_some_and(|g| done.iter().any(|d| s.monitors.iter().any(|m| &m.name == d && m.span.as_ref() == Some(g)))) {
                     continue;
@@ -204,7 +192,6 @@ fn perform(hub: &Hub, a: &Automation) -> Option<Undo> {
     Some(undo)
 }
 
-
 fn revert(hub: &Hub, undo: Undo) {
     let s = hub.snapshot();
     for (n, before, ours) in undo.screens {
@@ -227,7 +214,6 @@ fn revert(hub: &Hub, undo: Undo) {
     }
 }
 
-
 pub fn changed(old: &[Automation], new: &[Automation]) {
     let mut run = RUN.lock().unwrap();
     let run = run.get_or_insert_with(Run::default);
@@ -247,7 +233,6 @@ pub fn changed(old: &[Automation], new: &[Automation]) {
     run.undo.retain(|id, _| new.iter().any(|a| &a.id == id));
 }
 
-
 pub fn tick(hub: &Hub) {
     let mut guard = RUN.lock().unwrap();
     let run = guard.get_or_insert_with(Run::default);
@@ -265,7 +250,6 @@ pub fn tick(hub: &Hub) {
     let (date, now, weekday) = (t.date_naive(), t.hour() * 60 + t.minute(), t.weekday().num_days_from_monday() as u8);
     let mut fire: Vec<&Automation> = Vec::new();
     let mut put_back: Vec<String> = Vec::new();
-
 
     let mut at: Vec<(&Automation, u32)> = s
         .automations
@@ -293,7 +277,6 @@ pub fn tick(hub: &Hub) {
         }
     }
 
-
     let paused = s.paused != PauseReason::None;
     let instant = Instant::now();
     for a in s.automations.iter().filter(|a| a.enabled) {
@@ -307,10 +290,8 @@ pub fn tick(hub: &Hub) {
         }
     }
 
-
     let watched: Vec<&Automation> = s.automations.iter().filter(|a| a.enabled && matches!(a.trigger, Trigger::AppOpens { .. })).collect();
     if !watched.is_empty() {
-
         let names = crate::desktop::running_names();
         for a in watched {
             let Trigger::AppOpens { app } = &a.trigger else { continue };
@@ -325,7 +306,6 @@ pub fn tick(hub: &Hub) {
             }
         }
     }
-
 
     if s.automations.iter().any(|a| a.enabled && matches!(a.trigger, Trigger::OnBattery | Trigger::PluggedIn)) {
         let battery = crate::desktop::on_battery();
@@ -367,16 +347,13 @@ pub fn tick(hub: &Hub) {
     }
 }
 
-
 pub fn run_now(hub: &Hub, id: &str) {
     let s = hub.snapshot();
     if let Some(a) = s.automations.iter().find(|a| a.id == id) {
-
         let a = Automation { respect_manual: false, ..a.clone() };
         perform(hub, &a);
     }
 }
-
 
 pub fn next_all(hub: &Hub) {
     let s = hub.snapshot();
@@ -403,7 +380,6 @@ pub fn next_all(hub: &Hub) {
         perform(hub, &a);
     }
 }
-
 
 pub fn migrate(rotation: &std::collections::BTreeMap<String, zwall_ipc::Rotation>, schedules: &std::collections::BTreeMap<String, Vec<zwall_ipc::Slot>>) -> Vec<Automation> {
     let mut out = Vec::new();

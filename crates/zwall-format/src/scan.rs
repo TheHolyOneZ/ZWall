@@ -1,7 +1,4 @@
-
-
 use std::path::Path;
-
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct Found {
@@ -20,9 +17,7 @@ pub struct Found {
     pub source: Option<&'static str>,
 }
 
-
 pub fn wallpaper_engine(dir: &Path, folder: String) -> Option<Found> {
-
     let text = std::fs::read_to_string(dir.join("project.json")).ok()?;
     let json: serde_json::Value = serde_json::from_str(text.trim_start_matches('\u{feff}')).ok()?;
     let title = json["title"].as_str().filter(|t| !t.trim().is_empty()).map(String::from).unwrap_or_else(|| dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default());
@@ -53,7 +48,6 @@ pub fn kind_of(p: &Path) -> Option<&'static str> {
     }
 }
 
-
 pub fn scan(root: &Path, recursive: bool, max: usize) -> Result<Vec<Found>, String> {
     if !root.is_dir() {
         return Err(format!("{} isn't a folder", root.display()));
@@ -80,7 +74,6 @@ pub fn scan(root: &Path, recursive: bool, max: usize) -> Result<Vec<Found>, Stri
                 continue;
             }
             if let Some(kind) = kind_of(&p) {
-
                 if kind == "web" && p.is_file() && d != root && d.join("index.html").is_file() {
                     continue;
                 }
@@ -97,4 +90,3 @@ pub fn scan(root: &Path, recursive: bool, max: usize) -> Result<Vec<Found>, Stri
     }
     Ok(out)
 }
-

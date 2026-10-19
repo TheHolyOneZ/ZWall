@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { Film, FileArchive, FolderInput, Globe, ImagePlus } from "lucide-react";
 import { useStore } from "../lib/store";

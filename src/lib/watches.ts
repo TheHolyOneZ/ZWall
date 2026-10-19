@@ -1,5 +1,3 @@
-
-
 import { send } from "./actions";
 import { bridge } from "./ipc";
 import { useStore } from "./store";
@@ -16,7 +14,6 @@ export function blankWatch(path: string): Watch {
   return { id: Math.random().toString(36).slice(2, 10), path, enabled: true, recursive: true, kinds: [], collection: null, tags: [], prune: true, ignored: [] };
 }
 
-
 export async function startWatching() {
   const dir = await (await bridge).pickFolder("Watch a folder for new wallpapers");
   if (!dir) return;
@@ -32,7 +29,6 @@ export function upsert(w: Watch) {
 export function setEnabled(id: string, enabled: boolean) {
   save(all().map((w) => (w.id === id ? { ...w, enabled } : w)));
 }
-
 
 export function stopWatching(id: string, removeWallpapers: boolean) {
   const st = useStore.getState();

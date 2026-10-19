@@ -79,6 +79,32 @@ jobs:
             $resources["binaries/$($_.Name)"] = $_.Name
           }
           if (Test-Path "$bins/mpv.exe") { $resources["binaries/mpv.exe"] = "mpv.exe" }
+
+          # The engine (and onnxruntime inside it) links the MSVC C++ runtime dynamically.
+          # Ship it app-locally so the engine starts on PCs without the VC++ Redistributable.
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+          $crt = Get-ChildItem "$vs\VC\Redist\MSVC" -Directory |
+            Sort-Object { try { [version]$_.Name } catch { [version]"0.0" } } -Descending |
+            ForEach-Object { Get-ChildItem "$($_.FullName)\x64" -Directory -Filter "Microsoft.VC*.CRT" -ErrorAction SilentlyContinue } |
+            Select-Object -First 1
+          if (-not $crt) { Write-Error "MSVC runtime redist folder not found under $vs"; exit 1 }
+          Write-Host "VC++ runtime: $($crt.FullName)"
+          Get-ChildItem $crt.FullName -Filter *.dll | ForEach-Object {
+            Copy-Item $_.FullName "$bins/$($_.Name)"
+            $resources["binaries/$($_.Name)"] = $_.Name
+          }
+
+          # Every DLL the engine imports must be part of Windows or shipped next to it.
+          $dumpbin = Get-ChildItem "$vs\VC\Tools\MSVC\*\bin\Hostx64\x64\dumpbin.exe" | Select-Object -First 1
+          $imports = & $dumpbin.FullName /nologo /dependents target/release/zwall-engine.exe | Where-Object { $_ -match '^\s+\S+\.dll\s*$' } | ForEach-Object { $_.Trim() }
+          $system = @("kernel32","user32","gdi32","advapi32","shell32","ole32","oleaut32","ntdll","dwmapi","dxgi","d3d11","d3d12","d3dcompiler_47","opengl32","setupapi","ws2_32","bcrypt","bcryptprimitives","dbghelp","combase","comctl32","shlwapi","imm32","uxtheme","version","winmm","crypt32","secur32","userenv","propsys","powrprof","shcore","avrt","mfplat","mfreadwrite","mf","ncrypt","iphlpapi","psapi","winhttp","wininet","normaliz","cfgmgr32","hid","dinput8","xinput1_4","netapi32","wtsapi32","mmdevapi","ksuser","dcomp","d2d1","dwrite","windowscodecs","api-ms-win-*","ext-ms-*")
+          $missing = $imports | Where-Object {
+            $dll = $_.ToLower()
+            $base = $dll -replace '\.dll$', ''
+            -not ($system | Where-Object { $base -like $_ }) -and -not (Test-Path "$bins/$dll")
+          }
+          Write-Host "zwall-engine.exe imports: $($imports -join ', ')"
+          if ($missing) { Write-Error "zwall-engine.exe needs DLLs that are neither part of Windows nor shipped: $($missing -join ', ')"; exit 1 }
           $bundle = @{ targets = @("nsis"); externalBin = @("binaries/zwall-engine") }
           if ($resources.Count -gt 0) { $bundle.resources = $resources }
           @{ bundle = $bundle } | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 src-tauri/tauri.release.conf.json
@@ -86,6 +112,22 @@ jobs:
 
       - name: Build installer (NSIS)
         run: pnpm tauri build --config src-tauri/tauri.release.conf.json
+
+      - name: Check the installed engine starts
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem target/release/bundle/nsis/*.exe | Select-Object -First 1
+          $dir = Join-Path $env:RUNNER_TEMP "zwall-install"
+          Start-Process $setup.FullName -ArgumentList "/S", "/D=$dir" -Wait
+          Get-ChildItem $dir | Select-Object Name, Length
+          foreach ($f in @("zwall.exe", "zwall-engine.exe", "vcruntime140.dll", "vcruntime140_1.dll", "msvcp140.dll", "DirectML.dll")) {
+            if (-not (Test-Path (Join-Path $dir $f))) { Write-Error "The installer didn't install $f next to the app"; exit 1 }
+          }
+          # 'ctl pause' loads every DLL, then exits 1 because no engine is running.
+          # A loader failure would be 0xC0000135 (-1073741515) or similar instead.
+          $p = Start-Process (Join-Path $dir "zwall-engine.exe") -ArgumentList "ctl", "pause" -Wait -PassThru -NoNewWindow
+          Write-Host "zwall-engine ctl pause exited with $($p.ExitCode)"
+          if ($p.ExitCode -ne 1) { Write-Error ("zwall-engine.exe didn't start (exit 0x{0:X8})" -f $p.ExitCode); exit 1 }
 
       - name: List bundle output
         if: always()
@@ -151,15 +193,15 @@ jobs:
       - name: Place the engine next to the app and write the packaging config
         run: |
           mkdir -p src-tauri/binaries
-          cp target/release/zwall-engine src-tauri/binaries/zwall-engine-x86_64-unknown-linux-gnu
+          install -m 755 target/release/zwall-engine src-tauri/binaries/zwall-engine-x86_64-unknown-linux-gnu
           cat > src-tauri/tauri.release.conf.json <<'JSON'
           {
             "bundle": {
               "targets": ["deb", "rpm"],
               "externalBin": ["binaries/zwall-engine"],
               "linux": {
-                "deb": { "depends": ["libmpv2", "libwebkit2gtk-4.1-0"], "recommends": ["ffmpeg", "libjxl-tools"] },
-                "rpm": { "depends": ["mpv-libs", "webkit2gtk4.1"], "recommends": ["ffmpeg", "libjxl-utils"] }
+                "deb": { "depends": ["libmpv2", "libwayland-egl1", "libxcb1", "libstdc++6", "libwebkit2gtk-4.1-0"], "recommends": ["ffmpeg", "libjxl-tools"] },
+                "rpm": { "depends": ["mpv-libs", "libwayland-egl", "libxcb", "libstdc++", "webkit2gtk4.1"], "recommends": ["ffmpeg", "libjxl-utils"] }
               }
             }
           }
@@ -167,6 +209,27 @@ jobs:
 
       - name: Build packages (.deb + .rpm)
         run: pnpm tauri build --config src-tauri/tauri.release.conf.json
+
+      - name: Check the engine ships executable
+        run: |
+          for deb in target/release/bundle/deb/*.deb; do
+            dpkg-deb -c "$deb" | grep -E '^-rwxr-xr-x .*usr/bin/zwall-engine$' || { echo "::error::$deb ships usr/bin/zwall-engine without the execute bit"; exit 1; }
+          done
+          for rpm in target/release/bundle/rpm/*.rpm; do
+            rpm -qlvp "$rpm" | grep -E '^-rwxr-xr-x .*/usr/bin/zwall-engine$' || { echo "::error::$rpm ships /usr/bin/zwall-engine without the execute bit"; exit 1; }
+          done
+
+      - name: Check the packaged engine starts
+        run: |
+          dir=$(mktemp -d)
+          dpkg-deb -x target/release/bundle/deb/*.deb "$dir"
+          if ldd "$dir/usr/bin/zwall-engine" | grep 'not found'; then echo "::error::zwall-engine needs libraries that aren't installed"; exit 1; fi
+          # 'ctl pause' loads everything, then exits 1 because no engine is running.
+          set +e
+          out=$(XDG_RUNTIME_DIR="$dir" "$dir/usr/bin/zwall-engine" ctl pause 2>&1); code=$?
+          set -e
+          echo "zwall-engine ctl pause exited with $code: $out"
+          [ "$code" = 1 ] && grep -q "isn't running" <<<"$out" || { echo "::error::the packaged zwall-engine doesn't start"; exit 1; }
 
       - name: List bundle output
         if: always()

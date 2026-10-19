@@ -1,5 +1,3 @@
-
-
 use std::{
     fs::File,
     io::{Read, Write},
@@ -20,7 +18,6 @@ pub struct Video {
     volume: f64,
     speed: f64,
 }
-
 
 fn mpv_exe() -> Option<PathBuf> {
     let beside = std::env::current_exe().ok().and_then(|e| e.parent().map(|d| d.join("mpv.exe")));
@@ -90,7 +87,6 @@ impl Video {
         self.drain();
     }
 
-
     fn drain(&mut self) {
         let Some(pipe) = self.pipe.as_mut() else { return };
         let handle = HANDLE(pipe.as_raw_handle());
@@ -109,7 +105,6 @@ impl Video {
         }
     }
 
-
     pub fn draw(&mut self) {
         self.drain();
     }
@@ -120,7 +115,6 @@ impl Video {
             self.send(serde_json::json!(["set_property", "pause", paused]));
         }
     }
-
 
     pub fn set_volume(&mut self, volume: f64) {
         if (self.volume - volume).abs() > 0.1 {

@@ -1,9 +1,6 @@
-
-
 use crate::backend::{Backend, Rect};
 use std::{collections::BTreeMap, time::{Duration, Instant}};
 use zwall_ipc::{Settings, State};
-
 
 const COVERED: f32 = 0.95;
 
@@ -16,7 +13,6 @@ impl Conditions {
     pub fn new() -> Self {
         Self { last: None, on_battery: false }
     }
-
 
     pub fn resting(&mut self, backend: &dyn Backend, s: &State) -> Option<BTreeMap<String, String>> {
         if self.last.is_some_and(|t| t.elapsed() < Duration::from_secs(1)) {
@@ -38,7 +34,6 @@ impl Conditions {
     }
 }
 
-
 pub fn rest_of<'a>(key: &str, resting: &'a BTreeMap<String, String>) -> Option<&'a str> {
     let names: Vec<&str> = match key.strip_prefix("span:") {
         Some(g) => g.split('+').collect(),
@@ -48,7 +43,6 @@ pub fn rest_of<'a>(key: &str, resting: &'a BTreeMap<String, String>) -> Option<&
     names.iter().all(|n| resting.get(*n) == Some(first)).then_some(first.as_str())
 }
 
-
 pub fn effective(settings: &Settings, on_battery: bool) -> (u32, f32) {
     if on_battery && settings.battery_saver && !settings.pause_battery {
         (settings.fps_cap.min(30), settings.quality.min(0.5))
@@ -56,7 +50,6 @@ pub fn effective(settings: &Settings, on_battery: bool) -> (u32, f32) {
         (settings.fps_cap, settings.quality)
     }
 }
-
 
 pub fn daylight(hour: f32) -> [f32; 3] {
     const NIGHT: [f32; 3] = [0.62, 0.7, 0.9];
@@ -80,7 +73,6 @@ pub fn local_hour() -> f32 {
     let now = chrono::Local::now();
     now.hour() as f32 + now.minute() as f32 / 60.0
 }
-
 
 pub fn grade(settings: &Settings, calm: bool) -> [f32; 3] {
     let mut g = if settings.follow_daylight { daylight(local_hour()) } else { [1.0; 3] };

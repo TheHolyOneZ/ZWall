@@ -1,11 +1,8 @@
-
-
 import { forScreen, title } from "../lib/automations";
 import { useStore } from "../lib/store";
 import { Tip } from "./Tip";
 
 export function ScreenAutomations({ monitor }: { monitor: string }) {
-
   useStore((s) => s.engine?.automations);
   const mine = forScreen(monitor);
   const open = () => (mine.length ? useStore.getState().setFocusAutomation(mine[0].id) : useStore.getState().setMode("automate"));

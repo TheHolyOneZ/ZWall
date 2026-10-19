@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronRight } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -15,7 +13,6 @@ export function MenuList({ items, x, y, onClose, depth = 0, minWidth = WIDTH }: 
   const actionable = items.map((it, i) => (!it.separator && !it.heading && !it.disabled ? i : -1)).filter((i) => i >= 0);
 
   const checkable = items.some((it) => it.checked !== undefined);
-
 
   const place = () => {
     const el = ref.current;
@@ -126,7 +123,6 @@ export function MenuList({ items, x, y, onClose, depth = 0, minWidth = WIDTH }: 
   );
 }
 
-
 export function ContextMenuHost() {
   const menu = useStore((s) => s.menu);
   const close = useStore((s) => s.closeMenu);
@@ -149,7 +145,6 @@ export function ContextMenuHost() {
   }, [menu, close]);
   return <AnimatePresence>{menu && <MenuList key={`${menu.x},${menu.y}`} items={menu.items} x={menu.x} y={menu.y} onClose={close} />}</AnimatePresence>;
 }
-
 
 export function contextMenu(e: React.MouseEvent, items: MenuItem[]) {
   e.preventDefault();

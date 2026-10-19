@@ -1,9 +1,8 @@
-
-
 use crate::backend::Rect;
 use std::{process::Command, sync::Mutex, time::Duration};
 
 static SEE_THROUGH: Mutex<Vec<Rect>> = Mutex::new(Vec::new());
+static POINTER: Mutex<Option<(i32, i32)>> = Mutex::new(None);
 
 const SCRIPT: &str = r#"
 function report() {
@@ -25,13 +24,23 @@ workspace.windowList().forEach(watch);
 workspace.windowAdded.connect(function (w) { watch(w); report(); });
 workspace.windowRemoved.connect(report);
 report();
+
+var lastPointer = 0;
+function pointer() {
+    var now = Date.now();
+    if (now - lastPointer < 15) return;
+    lastPointer = now;
+    var p = workspace.cursorPos;
+    callDBus("eu.zsync.ZWall", "/eu/zsync/ZWall", "eu.zsync.ZWall", "Pointer", Math.round(p.x) + "," + Math.round(p.y));
+}
+workspace.cursorPosChanged.connect(pointer);
+pointer();
 "#;
 
 struct Bridge;
 
 #[zbus::interface(name = "eu.zsync.ZWall")]
 impl Bridge {
-
     fn translucent(&self, rects: String) {
         let parsed: Vec<Rect> = rects
             .split(';')
@@ -42,14 +51,23 @@ impl Bridge {
             .collect();
         *SEE_THROUGH.lock().unwrap() = parsed;
     }
+
+    fn pointer(&self, at: String) {
+        let mut v = at.split(',').filter_map(|n| n.trim().parse::<i32>().ok());
+        if let (Some(x), Some(y)) = (v.next(), v.next()) {
+            *POINTER.lock().unwrap() = Some((x, y));
+        }
+    }
 }
 
+pub fn pointer() -> Option<(i32, i32)> {
+    *POINTER.lock().unwrap()
+}
 
 pub fn see_through(r: Rect) -> bool {
     const SLACK: i32 = 64;
     SEE_THROUGH.lock().unwrap().iter().any(|f| r.x >= f.x - SLACK && r.y >= f.y - SLACK && r.x + r.w as i32 <= f.x + f.w as i32 + SLACK && r.y + r.h as i32 <= f.y + f.h as i32 + SLACK)
 }
-
 
 pub fn start() {
     std::thread::Builder::new()
@@ -86,6 +104,6 @@ fn load_script() -> anyhow::Result<()> {
     let id = String::from_utf8_lossy(&out.stdout).trim().to_string();
     anyhow::ensure!(id.parse::<i64>().is_ok_and(|n| n >= 0), "KWin refused the script ({id})");
     Command::new("qdbus6").args(["org.kde.KWin", &format!("/Scripting/Script{id}"), "org.kde.kwin.Script.run"]).output()?;
-    log::info!("kwin bridge: watching window translucency");
+    log::info!("kwin bridge: watching window translucency and the pointer");
     Ok(())
 }

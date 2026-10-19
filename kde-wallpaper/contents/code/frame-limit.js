@@ -1,5 +1,3 @@
-
-
 (function () {
   if (window.__zwallSetFps) return;
   var fps = 30;
@@ -60,7 +58,6 @@
     });
     paused.clear();
   }
-
 
   var due = 0;
   function frame(now) {

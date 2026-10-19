@@ -1,5 +1,3 @@
-
-
 use crate::{
     backend::{Backend, Rect},
     video::Video,
@@ -28,7 +26,6 @@ impl Saver {
     pub fn active(&self) -> bool {
         !self.shows.is_empty()
     }
-
 
     pub fn update(&mut self, backend: &mut dyn Backend, s: &State, idle_ms: u64, fullscreen: bool) {
         let minutes = s.settings.screensaver_minutes;
@@ -106,7 +103,6 @@ impl Saver {
         log::info!("screensaver off");
     }
 }
-
 
 fn path_of(key: &str, s: &State) -> String {
     let name = key.strip_prefix("saver:").unwrap_or(key);

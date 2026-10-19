@@ -1,5 +1,3 @@
-
-
 use super::{Backend, Rect, SurfaceHandles};
 use zwall_ipc::Monitor;
 

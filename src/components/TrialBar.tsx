@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { Eye } from "lucide-react";
 import { endTrial, keepTrial } from "../lib/trial";

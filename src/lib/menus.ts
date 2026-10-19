@@ -1,5 +1,3 @@
-
-
 import { add, rotationFor, setRotateEvery, TEMPLATES } from "./automations";
 import { add as addWidget, KINDS } from "./widgets";
 import { place, send } from "./actions";
@@ -16,7 +14,6 @@ const st = () => useStore.getState();
 function askNewTag(then: (tag: string) => void) {
   st().ask({ title: "New tag", value: "", placeholder: "e.g. cosy, cyberpunk, work", confirm: "Create", onConfirm: then });
 }
-
 
 function tagItems(ws: Wallpaper[]): MenuItem[] {
   const lib = st().library;

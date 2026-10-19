@@ -1,5 +1,3 @@
-
-
 import { send } from "./actions";
 import { useStore } from "./store";
 import type { UserCollection, Wallpaper } from "./types";

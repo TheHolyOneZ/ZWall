@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { Copy, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -192,7 +190,6 @@ function Line({ label, children }: { label: string; children: React.ReactNode })
     </div>
   );
 }
-
 
 function FontPicker({ value, weight, onChange }: { value: string; weight: number; onChange(font: string): void }) {
   const fonts = useStore((s) => s.engine?.fonts) ?? [];

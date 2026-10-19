@@ -1,5 +1,3 @@
-
-
 import { introEnabled, setIntroEnabled } from "./Intro";
 import { AnimatePresence, motion } from "motion/react";
 import { AppWindow, Blend, ExternalLink, Gauge, Hand, Headphones, History, Info, Keyboard, Layers, Lock, Maximize, Moon, MousePointerClick, Palette, Power, Search, Settings2, Sparkles, Sunrise, Tv, Volume2, X } from "lucide-react";
@@ -10,7 +8,6 @@ import { useStore } from "../lib/store";
 import type { Settings } from "../lib/types";
 import { Switch } from "./ui/Switch";
 import { setGlass } from "../lib/glass";
-
 
 const Query = createContext("");
 
@@ -37,7 +34,6 @@ export function SettingsPanel() {
   return (
     <AnimatePresence>
       {open && settings && (
-
         <motion.div
           key="settings"
           className="fixed inset-0 grid place-items-center p-6"
@@ -68,11 +64,9 @@ function Page({ s }: { s: Settings }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string>("general");
 
-
   const pinned = useRef(false);
   const scroller = useRef<HTMLDivElement>(null);
   const search = useRef<HTMLInputElement>(null);
-
 
   useEffect(() => {
     const root = scroller.current;
@@ -88,7 +82,6 @@ function Page({ s }: { s: Settings }) {
     root.querySelectorAll("section[id^=settings-]").forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [query]);
-
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -293,7 +286,6 @@ function Sections({ s }: { s: Settings }) {
   );
 }
 
-
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <section id={`settings-${id}`} className="settings-section scroll-mt-4">
@@ -304,7 +296,6 @@ function Section({ id, title, children }: { id: string; title: string; children:
     </section>
   );
 }
-
 
 function Row({ label, hint, icon, keywords, children }: { label: string; hint?: string; icon?: ReactNode; keywords?: string; children: ReactNode }) {
   if (!useMatch(label, hint, keywords)) return null;
@@ -338,7 +329,6 @@ function Choice<T extends number>({ value, options, onChange }: { value: T; opti
     </div>
   );
 }
-
 
 export function Toggle({ icon, label, hint, on, onChange }: { icon?: ReactNode; label: string; hint?: string; on: boolean; onChange(v: boolean): void }) {
   if (!useMatch(label, hint)) return null;
@@ -375,7 +365,6 @@ function Volume({ value, disabled, onChange }: { value: number; disabled: boolea
     </div>
   );
 }
-
 
 function Apps({ apps, onChange }: { apps: string[]; onChange(apps: string[]): void }) {
   const [draft, setDraft] = useState("");

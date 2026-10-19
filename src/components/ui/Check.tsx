@@ -1,5 +1,3 @@
-
-
 import { Check as Tick, Minus } from "lucide-react";
 
 export function Check({ on, mixed, disabled, label, onChange }: { on: boolean; mixed?: boolean; disabled?: boolean; label: string; onChange(v: boolean): void }) {

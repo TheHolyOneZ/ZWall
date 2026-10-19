@@ -1,5 +1,3 @@
-
-
 use anyhow::Context;
 use image::{imageops::FilterType, GrayImage, RgbImage};
 use ort::{session::Session, value::Tensor};
@@ -13,7 +11,6 @@ const MODEL_FILE: &str = "depth-anything-v2-small-q.onnx";
 
 const LONG_SIDE: u32 = 518;
 
-
 pub(crate) fn quiet_command(program: &str) -> std::process::Command {
     #[allow(unused_mut)]
     let mut c = std::process::Command::new(program);
@@ -25,14 +22,12 @@ pub(crate) fn quiet_command(program: &str) -> std::process::Command {
     c
 }
 
-
 #[derive(Debug, Clone)]
 pub struct DepthMap {
     pub width: u32,
     pub height: u32,
     pub data: Vec<f32>,
 }
-
 
 pub fn ensure_model(cache: &Path) -> anyhow::Result<PathBuf> {
     let path = cache.join(MODEL_FILE);
@@ -58,7 +53,6 @@ impl DepthModel {
         Ok(Self { session })
     }
 
-
     pub fn estimate(&mut self, photo: &RgbImage) -> anyhow::Result<DepthMap> {
         let (w, h) = model_size(photo.width(), photo.height());
         let small = image::imageops::resize(photo, w, h, FilterType::Triangle);
@@ -82,7 +76,6 @@ impl DepthModel {
     }
 }
 
-
 fn model_size(w: u32, h: u32) -> (u32, u32) {
     let scale = LONG_SIDE as f32 / w.max(h) as f32;
     let snap = |v: f32| ((v / 14.0).round().max(1.0) * 14.0) as u32;
@@ -90,7 +83,6 @@ fn model_size(w: u32, h: u32) -> (u32, u32) {
 }
 
 impl DepthMap {
-
     pub fn to_image(&self, width: u32) -> GrayImage {
         let raw = GrayImage::from_fn(self.width, self.height, |x, y| image::Luma([(self.data[(y * self.width + x) as usize] * 255.0).round() as u8]));
         let height = ((width as f32 / self.width as f32) * self.height as f32).round() as u32;
@@ -98,7 +90,6 @@ impl DepthMap {
         image::imageops::blur(&big, 2.0)
     }
 }
-
 
 pub fn flat(width: u32, height: u32) -> DepthMap {
     DepthMap { width, height, data: vec![0.5; (width * height) as usize] }

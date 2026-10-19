@@ -1,5 +1,3 @@
-
-
 export type PauseReason = "none" | "user" | "fullscreen" | "covered" | "battery" | "app" | "idle" | "locked";
 
 export interface Monitor {
@@ -18,7 +16,6 @@ export interface Monitor {
 export type Motion = "mouse" | "drift" | "still";
 export type Tint = "original" | "accent" | "mono";
 
-
 export interface Params {
   speed: number;
   intensity: number;
@@ -36,7 +33,6 @@ export interface Params {
 export type Overlay = "none" | "rain" | "snow" | "fireflies" | "grain";
 
 export const DEFAULT_PARAMS: Params = { speed: 1, intensity: 1, depth: 0, motion: "mouse", tint: "original", volume: 1, overlay: "none", overlay_amount: 1, life: 0 };
-
 
 export interface Settings {
   fps_cap: number;
@@ -65,13 +61,11 @@ export interface Settings {
   duck_audio: boolean;
 }
 
-
 export interface UserCollection {
   id: string;
   name: string;
   paths: string[];
 }
-
 
 export interface Meta {
   title?: string;
@@ -81,7 +75,6 @@ export interface Meta {
   width?: number;
   height?: number;
 }
-
 
 export interface Widget {
   id: string;
@@ -105,7 +98,6 @@ export interface Widget {
   metrics: string[];
 }
 
-
 export interface BlendLink {
   a: string;
   b: string;
@@ -124,13 +116,11 @@ export interface BlendEdge {
   size: number;
 }
 
-
 export interface Facts {
   width: number;
   height: number;
   bytes: number;
 }
-
 
 export type Trigger =
   | { type: "at"; time: string }
@@ -139,7 +129,6 @@ export type Trigger =
   | { type: "on_battery" }
   | { type: "plugged_in" }
   | { type: "startup" };
-
 
 export type Source =
   | { type: "everything" }
@@ -158,7 +147,6 @@ export type Action =
   | { type: "mute" }
   | { type: "unmute" }
   | { type: "volume"; level: number };
-
 
 export interface Automation {
   id: string;
@@ -228,7 +216,6 @@ export interface LibraryItem {
 
   from_watch?: string | null;
 }
-
 
 export interface Watch {
   id: string;

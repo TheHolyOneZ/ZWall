@@ -1,5 +1,3 @@
-
-
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -29,7 +27,6 @@ export default class ZWallExtension extends Extension {
         if (!win || this._shown.has(win))
             return;
         if (!(win.get_title() ?? '').startsWith(PREFIX)) {
-
             if (!this._watched.has(win)) {
                 const ids = [
                     win.connect('notify::title', () => this._consider(win)),
@@ -42,7 +39,6 @@ export default class ZWallExtension extends Extension {
         this._unwatch(win);
         const actor = win.get_compositor_private();
         if (!actor) {
-
             if (tries < 50) {
                 GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
                     this._consider(win, tries + 1);

@@ -1,5 +1,3 @@
-
-
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Intro, introWanted } from "./components/Intro";
@@ -76,7 +74,6 @@ export default function App() {
   );
 }
 
-
 function useVideoPreviews() {
   const missing = useStore((s) => {
     if (!s.connected || !s.engine) return "";
@@ -115,7 +112,6 @@ function useEngine() {
   }, []);
 }
 
-
 function useCreatorDrops() {
   useEffect(() => {
     let off = () => {};
@@ -132,7 +128,6 @@ function useCreatorDrops() {
   }, []);
 }
 
-
 function useAmbient() {
   const glow = useStore((s) => {
     const playing = [...(s.engine?.monitors ?? [])].sort((a, b) => +b.primary - +a.primary).filter((m) => m.wallpaper);
@@ -145,7 +140,6 @@ function useAmbient() {
   }, [glow]);
 }
 
-
 function useMaximizedCorners() {
   useEffect(() => {
     let stop: (() => void) | undefined;
@@ -153,7 +147,6 @@ function useMaximizedCorners() {
     return () => stop?.();
   }, []);
 }
-
 
 function useNoBrowserMenu() {
   useEffect(() => {

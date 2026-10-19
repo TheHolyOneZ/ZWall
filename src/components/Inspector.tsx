@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 import { ExternalLink, Eye, Heart, Layers, Monitor, RotateCcw, Share2, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -36,9 +34,7 @@ export function Inspector() {
   );
 }
 
-
 export const screenKey = (path: string, monitor: string) => `${path}#screen=${monitor}`;
-
 
 function useLiveParams(path: string, fallback?: string) {
   const own = useStore((s) => s.engine?.params?.[path]);
@@ -48,7 +44,6 @@ function useLiveParams(path: string, fallback?: string) {
   const pending = useRef<Params | null>(null);
   const frame = useRef(0);
   const dragging = useRef(false);
-
 
   useEffect(() => {
     if (!dragging.current && !pending.current) setP(remote ?? DEFAULT_PARAMS);
@@ -287,7 +282,6 @@ export function InspectorBody({ w }: { w: Wallpaper }) {
   );
 }
 
-
 export function Slider({ label, value: committed, min, max, step, format, onChange, reset }: { label: string; value: number; min: number; max: number; step: number; format: (v: number) => string; onChange(v: number): void; reset?: number }) {
   const [draft, setDraft] = useState<number | null>(null);
   const latest = useRef<number | null>(null);
@@ -373,7 +367,6 @@ export function Segmented<T extends string>({ id, label, value, options, swatch,
   );
 }
 
-
 function LoopMaker({ path }: { path: string }) {
   const duration = useStore((s) => s.engine?.durations?.[path]);
   const job = useStore((s) => s.engine?.jobs?.[path]);
@@ -400,7 +393,6 @@ function LoopMaker({ path }: { path: string }) {
   );
 }
 
-
 function DepthStatus({ path }: { path: string }) {
   const job = useStore((s) => s.engine?.jobs?.[path]);
   const ready = useStore((s) => !!s.engine?.depths?.[path]);
@@ -412,7 +404,6 @@ function DepthStatus({ path }: { path: string }) {
     </div>
   );
 }
-
 
 function TagEditor({ w }: { w: Wallpaper }) {
   const library = useStore((s) => s.library);
@@ -461,7 +452,6 @@ function TagEditor({ w }: { w: Wallpaper }) {
     </div>
   );
 }
-
 
 function Details({ w }: { w: Wallpaper }) {
   const facts = useStore((s) => s.engine?.facts?.[w.path]);
@@ -540,7 +530,6 @@ function Details({ w }: { w: Wallpaper }) {
   );
 }
 
-
 function Field({ label, value, placeholder, multiline, onSave, extra }: { label: string; value: string; placeholder?: string; multiline?: boolean; onSave(v: string): void; extra?: React.ReactNode }) {
   const [draft, setDraft] = useState(value);
   useEffect(() => setDraft(value), [value]);
@@ -605,7 +594,6 @@ function NumField({ value, placeholder, label, onSave }: { value?: number; place
   );
 }
 
-
 function Life({ path, value, onChange }: { path: string; value: number; onChange(v: number): void }) {
   const found = useStore((s) => s.engine?.scenes?.[path]?.found);
   const what: Record<string, string> = { sky: "the sky drifts and its stars twinkle", water: "water ripples", plants: "plants sway", lights: "lights glow" };
@@ -625,7 +613,6 @@ function Life({ path, value, onChange }: { path: string; value: number; onChange
     </div>
   );
 }
-
 
 function ScopePicker({ screens, scope, own, onScope, path }: { screens: string[]; scope: string; own: string[]; onScope(s: string): void; path: string }) {
   return (

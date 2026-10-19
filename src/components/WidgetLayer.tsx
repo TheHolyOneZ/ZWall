@@ -1,5 +1,3 @@
-
-
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useStore } from "../lib/store";
 import type { Widget } from "../lib/types";
@@ -19,7 +17,6 @@ export function useNow() {
   return now;
 }
 
-
 export function WidgetLayer({ monitor, interactive, zoom = 1 }: { monitor: string; interactive: boolean; zoom?: number }) {
   const all = useStore((s) => s.engine?.widgets);
   const accent = useStore((s) => s.engine?.accent ?? "#b35cff");
@@ -35,7 +32,6 @@ export function WidgetLayer({ monitor, interactive, zoom = 1 }: { monitor: strin
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-
 
   const [guides, setGuides] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
   const els = useRef(new Map<string, HTMLElement>());
@@ -64,7 +60,6 @@ export function WidgetLayer({ monitor, interactive, zoom = 1 }: { monitor: strin
         const gx: number[] = [];
         const gy: number[] = [];
         if (!ev.altKey) {
-
           const xs: [number, number][] = [[r.width / 2, r.width / 2], [r.width / 3, r.width / 3], [(r.width * 2) / 3, (r.width * 2) / 3]];
           const ys: [number, number][] = [[r.height / 2, r.height / 2], [r.height / 3, r.height / 3], [(r.height * 2) / 3, (r.height * 2) / 3]];
           for (const o of others) {
@@ -84,7 +79,6 @@ export function WidgetLayer({ monitor, interactive, zoom = 1 }: { monitor: strin
         setGuides({ x: gx, y: gy });
         cur = { ...w, x: Math.max(0, Math.min(1, cx / r.width)), y: Math.max(0, Math.min(1, cy / r.height)) };
       } else {
-
         const grow = (ev.clientX - start.x + ev.clientY - start.y) / r.height;
         cur = { ...w, size: Math.max(0.015, Math.min(0.4, start.size + grow * 0.6)) };
       }
@@ -136,7 +130,6 @@ export function WidgetLayer({ monitor, interactive, zoom = 1 }: { monitor: strin
             >
               <WidgetFace w={w} color={color} px={px} now={now} />
               {selected && (
-
                 <svg className="absolute pointer-events-none overflow-visible" style={{ left: -4 / zoom, top: -4 / zoom, width: `calc(100% + ${8 / zoom}px)`, height: `calc(100% + ${8 / zoom}px)` }}>
                   <rect x="0" y="0" width="100%" height="100%" rx={4 / zoom} fill="none" stroke="rgba(243,239,230,.75)" strokeWidth={1.5 / zoom} strokeDasharray={`${5 / zoom} ${4 / zoom}`} />
                 </svg>
@@ -154,7 +147,6 @@ export function WidgetLayer({ monitor, interactive, zoom = 1 }: { monitor: strin
     </div>
   );
 }
-
 
 export function WidgetFace({ w, color, px, now }: { w: Widget; color: string; px: number; now: Date }) {
   const effect = w.effect === "glow" ? `0 0 ${px * 0.25}px ${color}, 0 0 ${px * 0.08}px ${color}` : w.effect === "shadow" ? `0 ${Math.max(1, px * 0.04)}px ${px * 0.12}px rgba(0,0,0,.7)` : undefined;

@@ -1,5 +1,3 @@
-
-
 use crate::server::Hub;
 use std::{
     path::Path,
@@ -17,18 +15,15 @@ const MAX: usize = 20_000;
 
 static KICK: AtomicBool = AtomicBool::new(true);
 
-
 pub fn kick() {
     KICK.store(true, Ordering::Relaxed);
 }
-
 
 pub struct Scan {
     pub id: String,
     pub found: Vec<Found>,
     pub error: Option<String>,
 }
-
 
 pub fn wanted(w: &zwall_ipc::Watch, f: &Found) -> bool {
     f.skip.is_none() && matches!(f.kind, "photo" | "video" | "web") && (w.kinds.is_empty() || w.kinds.iter().any(|k| k == f.kind))

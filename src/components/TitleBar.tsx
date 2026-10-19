@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronRight, Minus, Pause as PauseIcon, Play, Square, Volume1, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -91,7 +89,6 @@ export function TitleBar() {
   );
 }
 
-
 function ModeSwitch() {
   const mode = useStore((s) => s.mode);
   const setMode = useStore((s) => s.setMode);
@@ -105,7 +102,6 @@ function ModeSwitch() {
     </nav>
   );
 }
-
 
 function NowPlaying() {
   const engine = useStore((s) => s.engine)!;

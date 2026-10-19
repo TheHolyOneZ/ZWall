@@ -1,10 +1,7 @@
-
-
 import { KIND_LABEL } from "./presets";
 import type { Kind, Wallpaper } from "./types";
 
 export type Sort = "name" | "newest" | "type" | "size";
-
 
 export type Res = "8k" | "4k" | "1440" | "1080" | "small" | "any" | "screens";
 export type Shape = "wide" | "landscape" | "portrait";
@@ -23,13 +20,11 @@ export interface Query {
   sort: Sort;
 }
 
-
 export type Collection = "fav" | "screen" | "recent" | `user:${string}` | `watch:${string}`;
 
 export const EMPTY_QUERY: Query = { text: "", kind: "all", tags: [], collection: null, res: null, shape: null, sort: "name" };
 
 const WEEK = 7 * 24 * 3600;
-
 
 export function inCollection(w: Wallpaper, c: Collection | null, onScreen: Set<string>, users: Record<string, Set<string>> = {}): boolean {
   if (c?.startsWith("user:")) return !!users[c.slice(5)]?.has(w.path);
@@ -39,7 +34,6 @@ export function inCollection(w: Wallpaper, c: Collection | null, onScreen: Set<s
   if (c === "recent") return !!w.added && Date.now() / 1000 - w.added < WEEK;
   return true;
 }
-
 
 export function resOf(w: Wallpaper): Exclude<Res, "screens"> {
   if (!w.width || !w.height) return "any";
@@ -52,7 +46,6 @@ export function shapeOf(w: Wallpaper): Shape | null {
   const r = w.width / w.height;
   return r >= 2 ? "wide" : r >= 1 ? "landscape" : "portrait";
 }
-
 
 export function inRes(w: Wallpaper, res: Res | null, biggest: [number, number] = [0, 0]): boolean {
   if (!res) return true;
@@ -71,7 +64,6 @@ export function matches(w: Wallpaper, text: string): boolean {
   const ws = words(w);
   return tokens.every((t) => name.includes(t) || ws.some((x) => x.startsWith(t)));
 }
-
 
 export function inKind(w: Wallpaper, kind: Kind | "all"): boolean {
   return kind === "all" || w.kind === kind || (kind === "shader" && !!w.alsoLive);
@@ -101,7 +93,6 @@ export function run(lib: Wallpaper[], q: Query, onScreen: Set<string> = new Set(
       return out.sort(byName);
   }
 }
-
 
 export function allTags(lib: Wallpaper[], created: string[] = []): [string, number][] {
   const counts = new Map<string, number>(created.map((t) => [t, 0]));

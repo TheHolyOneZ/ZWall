@@ -1,5 +1,3 @@
-
-
 import { AnimatePresence, motion } from "motion/react";
 import { Ban, FileArchive, Film, FolderOpen, Globe, ImageIcon, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";

@@ -1,5 +1,3 @@
-
-
 use crate::server::Hub;
 use std::{
     collections::HashSet,
@@ -20,7 +18,6 @@ fn is_photo(path: &str) -> bool {
     !path.starts_with("preset://") && !zwall_render::is_video(path) && !zwall_render::is_web(path)
 }
 
-
 pub fn scan(hub: &Arc<Hub>) {
     {
         let mut last = LAST_SCAN.lock().unwrap();
@@ -38,7 +35,6 @@ pub fn scan(hub: &Arc<Hub>) {
         }
     }
 }
-
 
 pub fn request(hub: &Arc<Hub>, path: String) {
     if !is_photo(&path) {
@@ -60,7 +56,6 @@ fn run(hub: Arc<Hub>, rx: mpsc::Receiver<String>) {
     let mut model: Option<zwall_depth::DepthModel> = None;
     let mut scene_model: Option<zwall_depth::segment::SceneModel> = None;
     for path in rx {
-
         let snap = hub.snapshot();
         let mut wants = zwall_ipc::Params::default();
         for (k, p) in snap.params.iter().filter(|(k, _)| zwall_ipc::key_path(k) == path) {
@@ -107,7 +102,7 @@ fn run(hub: Arc<Hub>, rx: mpsc::Receiver<String>) {
             let cache = crate::desktop::cache_dir().ok_or_else(|| anyhow::anyhow!("no cache dir"))?;
             let meta = std::fs::metadata(&path)?;
             let mut h = std::collections::hash_map::DefaultHasher::new();
-            (&path, meta.len(), meta.modified().ok()).hash(&mut h);
+            ("motion-v2", &path, meta.len(), meta.modified().ok()).hash(&mut h);
             let base = cache.join("scene").join(format!("{:016x}", h.finish()));
             let (png, txt) = (base.with_extension("png"), base.with_extension("txt"));
             if !png.exists() || !txt.exists() {
@@ -133,7 +128,6 @@ fn run(hub: Arc<Hub>, rx: mpsc::Receiver<String>) {
         }
     }
 }
-
 
 fn queued_done(path: &str) {
     if let Some(w) = WORKER.lock().unwrap().as_mut() {

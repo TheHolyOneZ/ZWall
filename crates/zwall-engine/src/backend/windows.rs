@@ -1,5 +1,3 @@
-
-
 use super::{Backend, Hotkey, Input, Pointer, Rect, SurfaceHandles};
 use raw_window_handle::{RawDisplayHandle, RawWindowHandle, Win32WindowHandle, WindowsDisplayHandle};
 use std::{collections::HashMap, num::NonZeroIsize};
@@ -25,7 +23,6 @@ use zwall_ipc::Monitor;
 const CLASS: PCWSTR = w!("ZWallWallpaper");
 
 pub struct WorkerW {
-
     parent: HWND,
     surfaces: HashMap<String, HWND>,
     hotkeys: Vec<(i32, Hotkey)>,
@@ -34,7 +31,6 @@ pub struct WorkerW {
 
 unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRESULT {
     match msg {
-
         WM_MOUSEACTIVATE => LRESULT(MA_NOACTIVATE as isize),
         WM_NCHITTEST => LRESULT(HTTRANSPARENT as isize),
         WM_ERASEBKGND => LRESULT(1),
@@ -49,9 +45,7 @@ fn class_name(hwnd: HWND) -> String {
     String::from_utf16_lossy(&buf[..n.max(0) as usize])
 }
 
-
 fn find_workerw() -> Option<HWND> {
-
     unsafe {
         let progman = FindWindowW(w!("Progman"), PCWSTR::null()).ok()?;
 
@@ -59,11 +53,9 @@ fn find_workerw() -> Option<HWND> {
         let _ = SendMessageTimeoutW(progman, 0x052C, WPARAM(0xD), LPARAM(0x1), SMTO_NORMAL, 1000, Some(&mut result));
         let _ = SendMessageTimeoutW(progman, 0x052C, WPARAM(0), LPARAM(0), SMTO_NORMAL, 1000, Some(&mut result));
 
-
         if let Ok(child) = FindWindowExW(Some(progman), None, w!("WorkerW"), PCWSTR::null()) {
             return Some(child);
         }
-
 
         struct Found(Option<HWND>);
         unsafe extern "system" fn each(hwnd: HWND, lp: LPARAM) -> BOOL {
@@ -90,7 +82,6 @@ fn find_workerw() -> Option<HWND> {
 
 impl WorkerW {
     pub fn connect() -> anyhow::Result<Self> {
-
         unsafe {
             let _ = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
             let instance = GetModuleHandleW(None)?;
@@ -118,7 +109,6 @@ impl WorkerW {
             let hwnd = if overlay {
                 CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW, CLASS, PCWSTR(title.as_ptr()), WS_POPUP | WS_VISIBLE, rect.x, rect.y, rect.w as i32, rect.h as i32, None, None, Some(instance.into()), None)?
             } else {
-
                 let mut p = POINT { x: rect.x, y: rect.y };
                 let _ = ScreenToClient(self.parent, &mut p);
                 CreateWindowExW(
@@ -149,11 +139,9 @@ impl WorkerW {
         Ok(SurfaceHandles { display: RawDisplayHandle::Windows(WindowsDisplayHandle::new()), window: RawWindowHandle::Win32(handle), native: hwnd.0 as u64 })
     }
 
-
     fn ours(&self, hwnd: HWND) -> bool {
         self.surfaces.values().any(|&h| h == hwnd) || class_name(hwnd) == "ZWallWallpaper"
     }
-
 
     fn repaint_desktop() {
         let mut path = [0u16; 520];
@@ -235,7 +223,6 @@ impl Backend for WorkerW {
 
     fn destroy_surface(&mut self, key: &str) {
         if let Some(hwnd) = self.surfaces.remove(key) {
-
             unsafe {
                 let _ = DestroyWindow(hwnd);
             }
@@ -246,7 +233,6 @@ impl Backend for WorkerW {
     }
 
     fn surfaces_lost(&mut self) -> bool {
-
         if unsafe { IsWindow(Some(self.parent)) }.as_bool() {
             return false;
         }
@@ -298,7 +284,6 @@ impl Backend for WorkerW {
     }
 
     fn set_hotkeys(&mut self, on: bool) -> Vec<String> {
-
         unsafe {
             for (id, _) in self.hotkeys.drain(..) {
                 let _ = UnregisterHotKey(None, id);
@@ -311,7 +296,6 @@ impl Backend for WorkerW {
         let combos: [(HOT_KEY_MODIFIERS, &str); 2] = [(MOD_WIN | MOD_ALT, "Win+Alt"), (MOD_WIN | MOD_CONTROL | MOD_ALT, "Win+Ctrl+Alt")];
         for (id, key, h, what) in [(1, 'P', Hotkey::Pause, "pause"), (2, 'M', Hotkey::Mute, "mute"), (3, 'N', Hotkey::Next, "next wallpaper")] {
             let got = combos.iter().find(|(mods, _)| {
-
                 unsafe { RegisterHotKey(None, id, *mods | MOD_NOREPEAT, key as u32) }.is_ok()
             });
             match got {
@@ -336,14 +320,11 @@ impl Backend for WorkerW {
     }
 
     fn fullscreen_active(&self) -> bool {
-
-
         if let Ok(state) = unsafe { SHQueryUserNotificationState() } {
             if state == QUNS_BUSY || state == QUNS_RUNNING_D3D_FULL_SCREEN || state == QUNS_PRESENTATION_MODE {
                 return true;
             }
         }
-
 
         unsafe {
             let fg = GetForegroundWindow();

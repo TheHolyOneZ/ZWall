@@ -1,5 +1,3 @@
-
-
 import { send } from "./actions";
 import { useStore } from "./store";
 import type { Widget } from "./types";
@@ -69,7 +67,6 @@ export function add(kind: Widget["kind"], monitor: string) {
   useStore.getState().editWidget(w.id);
 }
 
-
 export const SCHEMES: [string, string, Widget["effect"]][] = [
   ["Ivory", "#f3efe6", "shadow"],
   ["Snow", "#ffffff", "shadow"],
@@ -80,7 +77,6 @@ export const SCHEMES: [string, string, Widget["effect"]][] = [
   ["Mint", "#9ff2c6", "shadow"],
   ["Ink", "#141418", "none"],
 ];
-
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const WORDS = ["twelve", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];

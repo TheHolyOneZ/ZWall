@@ -1,8 +1,5 @@
-
-
 use naga::back::glsl;
 use std::{path::PathBuf, process::Command};
-
 
 fn qt_variant(src: &str) -> String {
     let common = zwall_render::COMMON.replace("struct Frame {", "struct Frame {\n    qt_Matrix: mat4x4f,\n    qt_Opacity: f32,");
@@ -27,7 +24,6 @@ fn to_glsl(name: &str, wgsl: &str) -> String {
     w.write().unwrap();
     out
 }
-
 
 fn qt_interface(glsl: &str) -> String {
     let start = glsl.find("struct Frame {").expect("Frame struct");
