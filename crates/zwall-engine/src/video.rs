@@ -7,3 +7,5 @@ mod imp;
 mod imp;
 
 pub use imp::Video;
+#[cfg(windows)]
+pub use imp::mpv_exe;

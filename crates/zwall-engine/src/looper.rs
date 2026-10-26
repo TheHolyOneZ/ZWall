@@ -15,7 +15,7 @@ pub fn duration(path: &str) -> Option<f32> {
 pub fn video_size(path: &str) -> Option<(u32, u32)> {
     let out = crate::desktop::command("ffprobe").args(["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0:s=x", path]).output().ok()?;
     let text = String::from_utf8_lossy(&out.stdout);
-    let (w, h) = text.trim().split_once('x')?;
+    let (w, h) = text.trim().trim_end_matches('x').split_once('x')?;
     Some((w.parse().ok()?, h.parse().ok()?))
 }
 

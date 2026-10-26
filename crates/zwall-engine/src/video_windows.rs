@@ -19,7 +19,7 @@ pub struct Video {
     speed: f64,
 }
 
-fn mpv_exe() -> Option<PathBuf> {
+pub fn mpv_exe() -> Option<PathBuf> {
     let beside = std::env::current_exe().ok().and_then(|e| e.parent().map(|d| d.join("mpv.exe")));
     let env = |k: &str| std::env::var_os(k).map(PathBuf::from);
     let candidates = [
