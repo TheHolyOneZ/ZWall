@@ -7,6 +7,15 @@ Installers for every version are available on the official website:
 
 ---
 
+## [0.1.2] — 2026-10-26
+
+### Fixed
+- **Windows: imported videos showed only a placeholder and their title instead of a thumbnail** ([#1](https://github.com/TheHolyOneZ/ZWall/issues/1)). Video previews were made with ffmpeg, which the Windows installer doesn't include, so on most PCs the preview was never created. When ffmpeg isn't there, ZWall now takes a still frame with the mpv that ships with the installer. This works for local drives, mapped drives and network paths (NAS). With ffmpeg installed you still get the moving preview.
+- **Windows: imported videos had no length or resolution in their details.** These came from ffprobe, which is part of ffmpeg. They are now read through mpv when ffprobe is missing.
+- **Video resolution showed as 0 × 0 with newer ffmpeg versions** (Linux too). Newer ffprobe versions add an extra separator to its output, which ZWall couldn't read.
+
+---
+
 ## [0.1.1] — 2026-10-19
 
 ### Fixed
