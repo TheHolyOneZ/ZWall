@@ -7,6 +7,15 @@ Installers for every version are available on the official website:
 
 ---
 
+## [0.1.3] — 2026-10-28
+
+### Fixed
+- **Opening a large video library could freeze the PC** ([#1](https://github.com/TheHolyOneZ/ZWall/issues/1)). ZWall made the thumbnails, lengths and resolutions for every video at the same time, so 100 videos meant about 300 ffmpeg or mpv processes at once. On Windows this could hang the whole system, and in one report a monitor dropped out until the work was done. Now at most two run at a time, at lower priority on Windows, while the rest wait their turn.
+- **Video length and resolution were worked out again on every start.** Since 0.1.2 that meant two mpv runs per video each time the app opened, even though the thumbnails were already saved. They are now saved next to the thumbnails, so a video is only looked at once. Opening a library you've seen before starts no extra programs at all.
+- **Saved thumbnails show up right away** instead of waiting behind videos that still need one.
+
+---
+
 ## [0.1.2] — 2026-10-26
 
 ### Fixed

@@ -6702,7 +6702,7 @@ dependencies = [
 
 [[package]]
 name = "zwall"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "raw-window-handle",
  "serde",
@@ -6720,7 +6720,7 @@ dependencies = [
 
 [[package]]
 name = "zwall-depth"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "image",
@@ -6730,7 +6730,7 @@ dependencies = [
 
 [[package]]
 name = "zwall-engine"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "chrono",
@@ -6759,7 +6759,7 @@ dependencies = [
 
 [[package]]
 name = "zwall-format"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "crc32fast",
  "jxl-oxide",
@@ -6772,7 +6772,7 @@ dependencies = [
 
 [[package]]
 name = "zwall-ipc"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "interprocess",
  "serde",
@@ -6781,7 +6781,7 @@ dependencies = [
 
 [[package]]
 name = "zwall-render"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "bytemuck",

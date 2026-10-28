@@ -8,7 +8,7 @@
 Animated, interactive and 3D wallpapers, a real wallpaper library, automations, desktop widgets,<br/>
 and multi-monitor blending. A Wallpaper Engine alternative that runs natively on KDE Plasma.
 
-[![Version](https://img.shields.io/badge/version-0.1.2-f3efe6?style=flat-square)](https://github.com/TheHolyOneZ/ZWall/releases)
+[![Version](https://img.shields.io/badge/version-0.1.3-f3efe6?style=flat-square)](https://github.com/TheHolyOneZ/ZWall/releases)
 [![Licence: GPL-3.0](https://img.shields.io/badge/licence-GPL--3.0-6d5bff?style=flat-square)](LICENSE)
 [![Linux](https://img.shields.io/badge/Linux-KDE%20Plasma%20%C2%B7%20Hyprland%20%C2%B7%20GNOME-22d3a6?style=flat-square&logo=linux&logoColor=white)](#where-it-runs)
 [![Windows](https://img.shields.io/badge/Windows-10%20%C2%B7%2011-4b7bff?style=flat-square&logo=windows&logoColor=white)](#where-it-runs)
@@ -231,7 +231,7 @@ Features that need the KDE Plasma plugin (web wallpapers, widgets, edge blending
 
 ## Install
 
-> **Version 0.1.2** fixes missing thumbnails for imported videos on Windows. **Version 0.1.1** fixed the wallpaper engine not starting after install on Linux and Windows. If you installed 0.1.0, please update. Packages appear on the [Releases page](https://github.com/TheHolyOneZ/ZWall/releases) and at [zsync.eu/zwall](https://zsync.eu/zwall/). What changed: [CHANGELOG.md](CHANGELOG.md).
+> **Version 0.1.3** makes thumbnails for large video libraries gentle on your PC. **Version 0.1.2** fixed missing thumbnails for imported videos on Windows. **Version 0.1.1** fixed the wallpaper engine not starting after install on Linux and Windows. If you installed 0.1.0, please update. Packages appear on the [Releases page](https://github.com/TheHolyOneZ/ZWall/releases) and at [zsync.eu/zwall](https://zsync.eu/zwall/). What changed: [CHANGELOG.md](CHANGELOG.md).
 
 **Linux runtime needs:** WebKitGTK 4.1, libmpv (video wallpapers), and optionally ffmpeg (moving video previews and the loop maker), Chromium or Chrome (web page previews) and libjxl's `cjxl` (smaller `.zwall` exports).
 
