@@ -35,6 +35,37 @@ impl Hub {
         self.state.lock().unwrap().clone()
     }
 
+    pub fn refresh_monitors(&self, mut found: Vec<Monitor>) -> bool {
+        {
+            let mut s = self.state.lock().unwrap();
+            let same = s.monitors.len() == found.len()
+                && s.monitors.iter().zip(&found).all(|(a, b)| a.name == b.name && a.x == b.x && a.y == b.y && a.width == b.width && a.height == b.height && a.primary == b.primary && a.scale == b.scale);
+            if same {
+                return false;
+            }
+            let resume = s.settings.resume;
+            let saved = self.saved.lock().unwrap();
+            for m in found.iter_mut() {
+                if let Some(old) = s.monitors.iter().find(|o| o.name == m.name) {
+                    m.wallpaper = old.wallpaper.clone();
+                    m.span = old.span.clone();
+                } else if let Some(sv) = saved.as_ref().filter(|_| resume).and_then(|x| x.monitors.get(&m.name)) {
+                    m.wallpaper = sv.wallpaper.clone();
+                    m.span = sv.span.clone();
+                }
+            }
+            let names: Vec<String> = found.iter().map(|m| m.name.clone()).collect();
+            for m in found.iter_mut() {
+                if m.span.as_ref().is_some_and(|g| !g.split('+').all(|n| names.iter().any(|x| x == n))) {
+                    m.span = None;
+                }
+            }
+            s.monitors = found;
+        }
+        self.broadcast();
+        true
+    }
+
     pub fn set_thumbnails(&self, thumbs: std::collections::BTreeMap<String, String>) {
         self.state.lock().unwrap().thumbs.extend(thumbs);
         self.broadcast();

@@ -7,6 +7,15 @@ Installers for every version are available on the official website:
 
 ---
 
+## [0.1.4] — 2026-11-20
+
+### Fixed
+- **Windows: displays connected while ZWall was running were not picked up** ([#2](https://github.com/TheHolyOneZ/ZWall/issues/2)). ZWall only read your display list once at start, so a display added later (Spacedesk, GlideX, a docking station, a TV) got no wallpaper, the wallpaper on the other displays could look stretched, and the Windows wallpaper showed through. ZWall now checks the displays every couple of seconds and updates when one is added, removed, moved or resized. No restart needed.
+- **Windows: a display that was disconnected stayed in ZWall's list.** It is now removed. If it comes back, it gets its previous wallpaper again.
+- **A spanned wallpaper is released when one of its displays goes away**, so the remaining displays don't stay stretched across a missing screen.
+
+---
+
 ## [0.1.3] — 2026-10-28
 
 ### Fixed

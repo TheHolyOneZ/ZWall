@@ -95,9 +95,22 @@ pub fn run(hub: Arc<Hub>, mut backend: Box<dyn Backend>, stop: Arc<AtomicBool>) 
     let mut meter = crate::gpu::Meter::new();
     let mut last_gpu = Instant::now();
     let mut last_signals = Instant::now() - Duration::from_secs(1);
+    let mut last_monitors = Instant::now();
 
     while !stop.load(Ordering::Relaxed) && !hub.quitting() {
         let frame_start = Instant::now();
+        if backend.name() == "windows" && last_monitors.elapsed() >= Duration::from_secs(2) {
+            last_monitors = Instant::now();
+            match backend.monitors() {
+                Ok(found) if !found.is_empty() => {
+                    if hub.refresh_monitors(found) {
+                        log::info!("displays changed; now {} monitor(s)", hub.snapshot().monitors.len());
+                    }
+                }
+                Ok(_) => {}
+                Err(e) => log::warn!("couldn't re-read the displays: {e:#}"),
+            }
+        }
         let s = hub.snapshot();
         crate::automation::tick(&hub);
         crate::blend::tick(&hub);
